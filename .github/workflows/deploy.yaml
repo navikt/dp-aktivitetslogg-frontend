@@ -17,7 +17,9 @@ jobs:
         with:
           registry-url: https://npm.pkg.github.com/
 
-      - run: npm ci
+      - run: npm ci --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
       - run: npm run build
       - run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json
 

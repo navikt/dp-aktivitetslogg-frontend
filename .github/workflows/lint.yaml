@@ -23,7 +23,9 @@ jobs:
         with:
           registry-url: https://npm.pkg.github.com/
 
-      - run: npm ci
+      - run: npm ci --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Run linters
         uses: wearerequired/lint-action@v2
