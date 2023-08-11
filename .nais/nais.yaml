@@ -42,3 +42,7 @@ spec:
     sidecar:
       enabled: true
       autoLogin: true
+  accessPolicy:
+    outbound:
+      rules:
+        - application: dp-aktivitetslogg
