@@ -20,6 +20,7 @@ jobs:
       - run: npm ci --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+      - run: npm rebuild && npm prepare
       - run: npm run build
       - run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json
 
