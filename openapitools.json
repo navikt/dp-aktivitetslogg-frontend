@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "6.6.0",
+    "generators": {
+      "api": {
+        "generatorName": "typescript-fetch",
+        "output": "#{cwd}/src/lib/#{name}",
+        "inputSpec": "https://raw.githubusercontent.com/navikt/dp-aktivitetslogg/main/openapi/src/main/resources/aktivitetslogg-api.yaml"
+      }
+    }
+  }
+}
