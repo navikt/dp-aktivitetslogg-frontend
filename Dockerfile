@@ -3,7 +3,8 @@ WORKDIR /usr/src/app
 
 ENV PORT=3000 \
     NODE_ENV=production \
-    TZ=Europe/Oslo
+    TZ=Europe/Oslo \
+    HOSTNAME=0.0.0.0
 
 COPY next.config.js ./
 COPY package.json ./
