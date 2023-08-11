@@ -25,7 +25,7 @@ export default function AktivitetsloggTabell({
         type="text"
         value={filterIdent}
         onChange={handleFilterChange}
-        placeholder="Filter by Ident"
+        placeholder="Filter med ident"
       />
       <Table size={"small"}>
         <Table.Header>
