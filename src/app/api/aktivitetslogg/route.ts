@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getAktivitetsloggOboToken, getAzureSession } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   console.log("route handler", process.env);
   const session = await getAzureSession(request);
