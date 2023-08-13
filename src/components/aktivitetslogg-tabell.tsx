@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useState } from "react";
-import { Loader, Table, Tooltip } from "@navikt/ds-react";
+import { Loader, Select, Table, TextField, Tooltip } from "@navikt/ds-react";
 import { Aktivitet, Aktivitetslogg, Kontekst } from "@/lib/aktivitetslogg-api";
 
 export default function AktivitetsloggTabell({
@@ -7,26 +7,55 @@ export default function AktivitetsloggTabell({
 }: {
   data: Aktivitetslogg[];
 }) {
-  const [filterIdent, setFilterIdent] = useState("");
+  const [filterIdent, setIdentFilter] = useState("");
+  const [filterHendelse, setHendelseFilter] = useState("");
 
   const handleFilterChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFilterIdent(event.target.value);
+    setIdentFilter(event.target.value);
+  };
+  const handleEventTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setHendelseFilter(event.target.value);
   };
 
   if (!data) return <Loader>Venter på aktivitetslogger</Loader>;
 
-  const filteredData = data.filter((item) =>
+  const hendelser = data.map((item) => item.hendelse.type);
+  const system = data.map(
+    (item) => item.systemParticipatingServices[0].service,
+  );
+
+  let filteredData = data.filter((item) =>
     item.ident.toLowerCase().includes(filterIdent.toLowerCase()),
   );
 
+  if (filterHendelse != "") {
+    filteredData = filteredData.filter(
+      (item) => item.hendelse.type == filterHendelse,
+    );
+  }
+
   return (
     <>
-      <input
-        type="text"
-        value={filterIdent}
-        onChange={handleFilterChange}
-        placeholder="Filter med ident"
-      />
+      <form>
+        <TextField
+          type="text"
+          value={filterIdent}
+          onChange={handleFilterChange}
+          label="Filter på ident"
+        />
+        <Select
+          label={"Hendelsetype"}
+          value={filterIdent}
+          onChange={handleEventTypeChange}
+        >
+          <option value="">Alle</option>
+          {hendelser.map((hendelse) => (
+            <option value={hendelse} key={hendelse}>
+              {hendelse}
+            </option>
+          ))}
+        </Select>
+      </form>
       <Table size={"small"}>
         <Table.Header>
           <Table.Row>
