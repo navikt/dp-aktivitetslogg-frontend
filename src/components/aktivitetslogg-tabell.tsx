@@ -1,6 +1,7 @@
 import React, { ChangeEvent, useState } from "react";
 import { Loader, Select, Table, TextField, Tooltip } from "@navikt/ds-react";
 import { Aktivitet, Aktivitetslogg, Kontekst } from "@/lib/aktivitetslogg-api";
+import _ from "lodash";
 
 export default function AktivitetsloggTabell({
   data,
@@ -19,7 +20,7 @@ export default function AktivitetsloggTabell({
 
   if (!data) return <Loader>Venter på aktivitetslogger</Loader>;
 
-  const hendelser = data.map((item) => item.hendelse.type);
+  const hendelser = _.unique(data.map((item) => item.hendelse.type));
   const system = data.map(
     (item) => item.systemParticipatingServices[0].service,
   );
@@ -29,11 +30,7 @@ export default function AktivitetsloggTabell({
   );
 
   if (filterHendelse != "") {
-    filteredData = Array.from(
-      new Set(
-        filteredData.filter((item) => item.hendelse.type == filterHendelse),
-      ),
-    );
+    filteredData.filter((item) => item.hendelse.type == filterHendelse);
   }
 
   return (
