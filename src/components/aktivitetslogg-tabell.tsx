@@ -29,8 +29,10 @@ export default function AktivitetsloggTabell({
   );
 
   if (filterHendelse != "") {
-    filteredData = filteredData.filter(
-      (item) => item.hendelse.type == filterHendelse,
+    filteredData = Array.from(
+      new Set(
+        filteredData.filter((item) => item.hendelse.type == filterHendelse),
+      ),
     );
   }
 
