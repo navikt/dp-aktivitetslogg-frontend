@@ -20,7 +20,7 @@ export default function AktivitetsloggTabell({
 
   if (!data) return <Loader>Venter på aktivitetslogger</Loader>;
 
-  const hendelser = _.unique(data.map((item) => item.hendelse.type));
+  const hendelser = _.uniq(data.map((item) => item.hendelse.type));
   const system = data.map(
     (item) => item.systemParticipatingServices[0].service,
   );
