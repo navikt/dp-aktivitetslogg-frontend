@@ -45,7 +45,7 @@ export default function AktivitetsloggTabell({
         <Select
           label={"Hendelsetype"}
           value={filterIdent}
-          onChange={handleEventTypeChange}
+          onSelect={handleEventTypeChange}
         >
           <option value="">Alle</option>
           {hendelser.map((hendelse) => (
