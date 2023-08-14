@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { getAktivitetsloggOboToken, getAzureSession } from "@/lib/auth";
 
 export async function GET(request: Request) {
-  console.log("route handler", process.env);
   const session = await getAzureSession(request);
 
   if (!session)

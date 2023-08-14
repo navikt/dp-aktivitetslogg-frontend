@@ -30,7 +30,9 @@ export default function AktivitetsloggTabell({
   );
 
   if (filterHendelse != "") {
-    filteredData.filter((item) => item.hendelse.type == filterHendelse);
+    filteredData = filteredData.filter(
+      (item) => item.hendelse.type == filterHendelse,
+    );
   }
 
   return (
@@ -44,8 +46,8 @@ export default function AktivitetsloggTabell({
         />
         <Select
           label={"Hendelsetype"}
-          value={filterIdent}
-          onSelect={handleEventTypeChange}
+          defaultValue={filterHendelse}
+          onChange={handleEventTypeChange}
         >
           <option value="">Alle</option>
           {hendelser.map((hendelse) => (

@@ -9,7 +9,10 @@ import {
   GetAktivitetsloggRequest,
 } from "@/lib/aktivitetslogg-api";
 
-const client = new AktivitetsloggApi(new Configuration({ basePath: "api" }));
+const client = new AktivitetsloggApi(
+  new Configuration({ basePath: process.env.NEXT_PUBLIC_API_PATH }),
+);
+
 export default function AktivitetsloggContainer() {
   const [aktivitetslogger, setAktivitetslogger] = useState<Aktivitetslogg[]>(
     [],
