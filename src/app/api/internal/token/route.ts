@@ -1,11 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { getAzureSession } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
-async function tokenHandler(req: NextApiRequest, res: NextApiResponse<string>) {
-  const session = await getAzureSession(req);
+export async function GET(request: Request) {
+  const session = await getAzureSession(request);
   const isDev = process.env.NAIS_CLUSTER_NAME?.startsWith("dev-");
-  if (!session || !isDev) return res.status(401).end();
-  res.status(200).send(session.token);
+  if (!session || !isDev) return NextResponse.json({}, { status: 401 });
+  return NextResponse.json(session.token, { status: 200 });
 }
-
-export default tokenHandler;
