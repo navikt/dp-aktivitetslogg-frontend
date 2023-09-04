@@ -11,7 +11,9 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
 
-  const url = new URL("http://dp-aktivitetslogg/aktivitetslogg");
+  const url = new URL(
+    process.env.API_BASE_URL || "http://dp-aktivitetslogg/aktivitetslogg",
+  );
   url.search = searchParams.toString();
   const response = await fetch(url, {
     headers: {
