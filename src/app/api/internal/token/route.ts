@@ -5,5 +5,9 @@ export async function GET(request: Request) {
   const session = await getAzureSession(request);
   const isDev = process.env.NAIS_CLUSTER_NAME?.startsWith("dev-");
   if (!session || !isDev) return NextResponse.json({}, { status: 401 });
-  return NextResponse.json(session.token, { status: 200 });
+
+  const audience = `api://${process.env.NAIS_CLUSTER_NAME}.teamdagpenger.dp-aktivitetslogg/.default`;
+  const oboToken = await session.apiToken(audience);
+
+  return NextResponse.json(oboToken, { status: 200 });
 }
