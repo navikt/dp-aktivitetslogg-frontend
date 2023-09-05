@@ -9,7 +9,8 @@
     "lint": "next lint",
     "test": "next lint",
     "prepare": "husky install && npm run generate-api-types",
-    "generate-api-types": "openapi-generator-cli generate"
+    "generate-api-types": "openapi-generator-cli generate",
+    "port-forward": "kubectl -n teamdagpenger port-forward svc/dp-aktivitetslogg 8081:80"
   },
   "dependencies": {
     "@navikt/dp-auth": "^0.3.3",

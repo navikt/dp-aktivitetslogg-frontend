@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   const audience = `api://${process.env.NAIS_CLUSTER_NAME}.teamdagpenger.dp-aktivitetslogg/.default`;
   const oboToken = await session.apiToken(audience);
 
-  return NextResponse.json(
+  return new Response(
     "NEXT_PUBLIC_API_PATH=/api\n" +
       "IS_LOCALHOST=true\n" +
       `DP_AKTIVITETSLOGG_TOKEN=${oboToken}\n` +
