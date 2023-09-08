@@ -1,0 +1,10 @@
+.form {
+    width: 100%;
+    margin-bottom: 32px;
+}
+.antallAktiviteter {
+    width: 100%;
+    justify-content: end;
+    display: flex;
+    margin-bottom: 16px;
+}

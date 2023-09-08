@@ -1,12 +1,23 @@
 import React, { ChangeEvent, useState } from "react";
-import { Loader, Select, Table, TextField, Tooltip } from "@navikt/ds-react";
+import {
+  HStack,
+  Label,
+  Loader,
+  Select,
+  Table,
+  TextField,
+  Tooltip,
+} from "@navikt/ds-react";
 import { Aktivitet, Aktivitetslogg, Kontekst } from "@/lib/aktivitetslogg-api";
 import _ from "lodash";
+import styles from "@/components/aktivitetslogg-tabell.module.css";
 
 export default function AktivitetsloggTabell({
   data,
+  antallAktiviteter,
 }: {
   data: Aktivitetslogg[];
+  antallAktiviteter: number | undefined;
 }) {
   const [filterIdent, setIdentFilter] = useState("");
   const [filterHendelse, setHendelseFilter] = useState("");
@@ -37,26 +48,33 @@ export default function AktivitetsloggTabell({
 
   return (
     <>
-      <form>
-        <TextField
-          type="text"
-          value={filterIdent}
-          onChange={handleFilterChange}
-          label="Filter på ident"
-        />
-        <Select
-          label={"Hendelsetype"}
-          defaultValue={filterHendelse}
-          onChange={handleEventTypeChange}
-        >
-          <option value="">Alle</option>
-          {hendelser.map((hendelse) => (
-            <option value={hendelse} key={hendelse}>
-              {hendelse}
-            </option>
-          ))}
-        </Select>
+      <form className={styles.form}>
+        <HStack gap={"4"} align={"start"}>
+          <TextField
+            type="text"
+            value={filterIdent}
+            onChange={handleFilterChange}
+            label="Filter på ident"
+            size={"small"}
+          />
+          <Select
+            label={"Hendelsetype"}
+            defaultValue={filterHendelse}
+            onChange={handleEventTypeChange}
+            size={"small"}
+          >
+            <option value="">Alle</option>
+            {hendelser.map((hendelse) => (
+              <option value={hendelse} key={hendelse}>
+                {hendelse}
+              </option>
+            ))}
+          </Select>
+        </HStack>
       </form>
+      <div className={styles.antallAktiviteter}>
+        <Label size={"small"}>Antall aktiviteter: {antallAktiviteter}</Label>
+      </div>
       <Table size={"small"}>
         <Table.Header>
           <Table.Row>

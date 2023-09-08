@@ -19,6 +19,10 @@ export default function AktivitetsloggContainer() {
   );
   const [lastSeen, setLastSeen] = useState<string | null>(null);
 
+  const [antallAktiviteter, setAntallAktiviteter] = useState<
+    number | undefined
+  >(0);
+
   useEffect(() => {
     const params: GetAktivitetsloggRequest = {};
     if (lastSeen != null) {
@@ -38,5 +42,16 @@ export default function AktivitetsloggContainer() {
     }
   }, [aktivitetslogger]);
 
-  return <AktivitetsloggTabell data={aktivitetslogger} />;
+  useEffect(() => {
+    client.getAntallAktiviteter().then((response) => {
+      setAntallAktiviteter(response.antall);
+    });
+  }, []);
+
+  return (
+    <AktivitetsloggTabell
+      data={aktivitetslogger}
+      antallAktiviteter={antallAktiviteter}
+    />
+  );
 }
