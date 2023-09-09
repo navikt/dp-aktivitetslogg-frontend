@@ -23,17 +23,20 @@ export default function AktivitetsloggContainer() {
     number | undefined
   >(0);
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   useEffect(() => {
     const params: GetAktivitetsloggRequest = {};
     if (lastSeen != null) {
       params.since = lastSeen;
       params.wait = true;
+      setIsLoading(false);
+    } else {
+      setIsLoading(true);
     }
-    client
-      .getAktivitetslogg(params)
-      .then((res) =>
-        setAktivitetslogger((prevState) => [...res, ...prevState]),
-      );
+    client.getAktivitetslogg(params).then((res) => {
+      setAktivitetslogger((prevState) => [...res, ...prevState]);
+    });
   }, [lastSeen]);
 
   useEffect(() => {
@@ -50,6 +53,7 @@ export default function AktivitetsloggContainer() {
 
   return (
     <AktivitetsloggTabell
+      isLoading={isLoading}
       data={aktivitetslogger}
       antallAktiviteter={antallAktiviteter}
     />

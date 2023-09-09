@@ -2,8 +2,8 @@ import React, { ChangeEvent, useState } from "react";
 import {
   HStack,
   Label,
-  Loader,
   Select,
+  Skeleton,
   Table,
   TextField,
   Tooltip,
@@ -13,9 +13,11 @@ import _ from "lodash";
 import styles from "@/components/aktivitetslogg-tabell.module.css";
 
 export default function AktivitetsloggTabell({
+  isLoading,
   data,
   antallAktiviteter,
 }: {
+  isLoading: boolean;
   data: Aktivitetslogg[];
   antallAktiviteter: number | undefined;
 }) {
@@ -28,8 +30,6 @@ export default function AktivitetsloggTabell({
   const handleEventTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setHendelseFilter(event.target.value);
   };
-
-  if (!data) return <Loader>Venter på aktivitetslogger</Loader>;
 
   const hendelser = _.uniq(data.map((item) => item.hendelse.type));
   const system = data.map(
@@ -86,24 +86,28 @@ export default function AktivitetsloggTabell({
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {filteredData.map((aktivitetslogg) => (
-            <Table.ExpandableRow
-              key={aktivitetslogg.id}
-              expandOnRowClick={true}
-              content={<Meldinger data={aktivitetslogg.aktiviteter} />}
-            >
-              <Table.DataCell scope="row">
-                {aktivitetslogg.opprettet.toLocaleString()}
-              </Table.DataCell>
-              <Table.DataCell>{aktivitetslogg.hendelse.type}</Table.DataCell>
-              <Table.DataCell>
-                {aktivitetslogg.hendelse.meldingsreferanseId}
-              </Table.DataCell>
-              <Table.DataCell>
-                {aktivitetslogg.systemParticipatingServices[0].service}
-              </Table.DataCell>
-            </Table.ExpandableRow>
-          ))}
+          {isLoading ? (
+            <SkeletonRow />
+          ) : (
+            filteredData.map((aktivitetslogg) => (
+              <Table.ExpandableRow
+                key={aktivitetslogg.id}
+                expandOnRowClick={true}
+                content={<Meldinger data={aktivitetslogg.aktiviteter} />}
+              >
+                <Table.DataCell scope="row">
+                  {aktivitetslogg.opprettet.toLocaleString()}
+                </Table.DataCell>
+                <Table.DataCell>{aktivitetslogg.hendelse.type}</Table.DataCell>
+                <Table.DataCell>
+                  {aktivitetslogg.hendelse.meldingsreferanseId}
+                </Table.DataCell>
+                <Table.DataCell>
+                  {aktivitetslogg.systemParticipatingServices[0].service}
+                </Table.DataCell>
+              </Table.ExpandableRow>
+            ))
+          )}
         </Table.Body>
       </Table>
     </>
@@ -140,6 +144,43 @@ function Meldinger({ data }: { data: Aktivitet[] }) {
         ))}
       </Table.Body>
     </Table>
+  );
+}
+
+function SkeletonRow() {
+  return (
+    <>
+      <Table.ExpandableRow key={1} expandOnRowClick={false} content={<div />}>
+        <Table.DataCell scope="row">
+          <Skeleton />
+        </Table.DataCell>
+        <Table.DataCell>
+          {" "}
+          <Skeleton />
+        </Table.DataCell>
+        <Table.DataCell>
+          <Skeleton />
+        </Table.DataCell>
+        <Table.DataCell>
+          <Skeleton />
+        </Table.DataCell>
+      </Table.ExpandableRow>
+      <Table.ExpandableRow key={1} expandOnRowClick={false} content={<div />}>
+        <Table.DataCell scope="row">
+          <Skeleton />
+        </Table.DataCell>
+        <Table.DataCell>
+          {" "}
+          <Skeleton />
+        </Table.DataCell>
+        <Table.DataCell>
+          <Skeleton />
+        </Table.DataCell>
+        <Table.DataCell>
+          <Skeleton />
+        </Table.DataCell>
+      </Table.ExpandableRow>
+    </>
   );
 }
 
