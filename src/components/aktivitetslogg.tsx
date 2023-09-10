@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import AktivitetsloggTabell from "./aktivitetslogg-tabell";
 import {
   Aktivitetslogg,
@@ -8,6 +8,9 @@ import {
   Configuration,
   GetAktivitetsloggRequest,
 } from "@/lib/aktivitetslogg-api";
+import styles from "@/components/aktivitetslogg-tabell.module.css";
+import { HStack, Label, Select, TextField } from "@navikt/ds-react";
+import _ from "lodash";
 
 const client = new AktivitetsloggApi(
   new Configuration({ basePath: process.env.NEXT_PUBLIC_API_PATH }),
@@ -19,43 +22,75 @@ export default function AktivitetsloggContainer() {
   );
   const [lastSeen, setLastSeen] = useState<string | null>(null);
 
-  const [antallAktiviteter, setAntallAktiviteter] = useState<
+  const [totaltAntallAktiviteter, setTotaltAntallAktiviteter] = useState<
     number | undefined
   >(0);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [filterIdent, setIdentFilter] = useState<string | undefined>(undefined);
+
+  const [filterHendelse, setHendelseFilter] = useState("");
+
+  const handleFilterChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setIdentFilter(event.target.value);
+  };
+  const handleEventTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setHendelseFilter(event.target.value);
+  };
+
+  const hendelser = _.uniq(aktivitetslogger.map((item) => item.hendelse.type));
 
   useEffect(() => {
-    const params: GetAktivitetsloggRequest = {};
-    if (lastSeen != null) {
-      params.since = lastSeen;
-      params.wait = true;
-      setIsLoading(false);
-    } else {
-      setIsLoading(true);
-    }
+    setIsLoading(true);
+
+    const params: GetAktivitetsloggRequest = { ident: filterIdent };
+
     client.getAktivitetslogg(params).then((res) => {
-      setAktivitetslogger((prevState) => [...res, ...prevState]);
+      setAktivitetslogger(res);
+      client.getAntallAktiviteter().then((response) => {
+        setTotaltAntallAktiviteter(response.antall);
+        setIsLoading(false);
+      });
     });
-  }, [lastSeen]);
-
-  useEffect(() => {
-    if (aktivitetslogger.length > 0) {
-      setLastSeen(aktivitetslogger[0].id!);
-    }
-  }, [aktivitetslogger]);
-
-  useEffect(() => {
-    client.getAntallAktiviteter().then((response) => {
-      setAntallAktiviteter(response.antall);
-    });
-  }, []);
+  }, [lastSeen, filterIdent]);
 
   return (
-    <AktivitetsloggTabell
-      isLoading={isLoading}
-      data={aktivitetslogger}
-      antallAktiviteter={antallAktiviteter}
-    />
+    <>
+      <form className={styles.form}>
+        <HStack gap={"4"} align={"start"}>
+          <TextField
+            type="text"
+            value={filterIdent}
+            onChange={handleFilterChange}
+            label="Filter på ident"
+            size={"small"}
+          />
+          <Select
+            label={"Hendelsetype"}
+            defaultValue={filterHendelse}
+            onChange={handleEventTypeChange}
+            size={"small"}
+          >
+            <option value="">Alle</option>
+            {hendelser.map((hendelse) => (
+              <option value={hendelse} key={hendelse}>
+                {hendelse}
+              </option>
+            ))}
+          </Select>
+        </HStack>
+      </form>
+      <div className={styles.antallAktiviteter}>
+        <Label size={"small"}>
+          Totalt antall aktiviteter: {totaltAntallAktiviteter}
+        </Label>
+      </div>
+      <div className={styles.antallAktiviteter}>
+        <Label size={"small"}>
+          Antall aktiviteter i søk: {aktivitetslogger.length}
+        </Label>
+      </div>
+      <AktivitetsloggTabell isLoading={isLoading} data={aktivitetslogger} />
+    </>
   );
 }

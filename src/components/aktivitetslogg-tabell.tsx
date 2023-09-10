@@ -15,66 +15,12 @@ import styles from "@/components/aktivitetslogg-tabell.module.css";
 export default function AktivitetsloggTabell({
   isLoading,
   data,
-  antallAktiviteter,
 }: {
   isLoading: boolean;
   data: Aktivitetslogg[];
-  antallAktiviteter: number | undefined;
 }) {
-  const [filterIdent, setIdentFilter] = useState("");
-  const [filterHendelse, setHendelseFilter] = useState("");
-
-  const handleFilterChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setIdentFilter(event.target.value);
-  };
-  const handleEventTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setHendelseFilter(event.target.value);
-  };
-
-  const hendelser = _.uniq(data.map((item) => item.hendelse.type));
-  const system = data.map(
-    (item) => item.systemParticipatingServices[0].service,
-  );
-
-  let filteredData = data.filter((item) =>
-    item.ident.toLowerCase().includes(filterIdent.toLowerCase()),
-  );
-
-  if (filterHendelse != "") {
-    filteredData = filteredData.filter(
-      (item) => item.hendelse.type == filterHendelse,
-    );
-  }
-
   return (
     <>
-      <form className={styles.form}>
-        <HStack gap={"4"} align={"start"}>
-          <TextField
-            type="text"
-            value={filterIdent}
-            onChange={handleFilterChange}
-            label="Filter på ident"
-            size={"small"}
-          />
-          <Select
-            label={"Hendelsetype"}
-            defaultValue={filterHendelse}
-            onChange={handleEventTypeChange}
-            size={"small"}
-          >
-            <option value="">Alle</option>
-            {hendelser.map((hendelse) => (
-              <option value={hendelse} key={hendelse}>
-                {hendelse}
-              </option>
-            ))}
-          </Select>
-        </HStack>
-      </form>
-      <div className={styles.antallAktiviteter}>
-        <Label size={"small"}>Antall aktiviteter: {antallAktiviteter}</Label>
-      </div>
       <Table size={"small"}>
         <Table.Header>
           <Table.Row>
@@ -89,7 +35,7 @@ export default function AktivitetsloggTabell({
           {isLoading ? (
             <SkeletonRow />
           ) : (
-            filteredData.map((aktivitetslogg) => (
+            data.map((aktivitetslogg) => (
               <Table.ExpandableRow
                 key={aktivitetslogg.id}
                 expandOnRowClick={true}
