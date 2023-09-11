@@ -1,12 +1,16 @@
 import type { NextPage } from "next";
 import styles from "@/app/page.module.css";
 import AktivitetsloggContainer from "../../components/aktivitetslogg";
+import React from "react";
+import Header from "@/components/header";
 
 const AktivitetsloggPage: NextPage = ({}) => {
   return (
-    <main className={styles.main}>
-      <h1 className={styles.title}>Aktivitetslogg</h1>
-      <AktivitetsloggContainer />
+    <main>
+      <Header />
+      <div className={styles.main}>
+        <AktivitetsloggContainer />
+      </div>
     </main>
   );
 };
