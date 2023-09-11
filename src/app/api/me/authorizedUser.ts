@@ -16,7 +16,7 @@ export async function authorizeUser(request: Request): Promise<object> {
       "https://graph.microsoft.com/.default",
     );
     const data = await fetch(
-      "https://graph.microsoft.com/v1.0/me/?$select=,givenName,surname",
+      "https://graph.microsoft.com/v1.0/me/?$select=givenName,surname",
       {
         headers: {
           Accept: "application/json",
