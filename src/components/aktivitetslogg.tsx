@@ -11,6 +11,7 @@ import {
 import styles from "@/components/aktivitetslogg-tabell.module.css";
 import { HStack, Label, Select, TextField } from "@navikt/ds-react";
 import _ from "lodash";
+import { JSEncrypt } from "jsencrypt";
 
 const client = new AktivitetsloggApi(
   new Configuration({ basePath: process.env.NEXT_PUBLIC_API_PATH }),
@@ -30,6 +31,7 @@ export default function AktivitetsloggContainer() {
   const [filterIdent, setIdentFilter] = useState<string | undefined>(undefined);
 
   const [filterHendelse, setHendelseFilter] = useState("");
+  const [publicKey, setPublicKey] = useState<string | undefined>(undefined);
 
   const handleFilterChange = (event: ChangeEvent<HTMLInputElement>) => {
     setIdentFilter(event.target.value);
@@ -43,7 +45,17 @@ export default function AktivitetsloggContainer() {
   useEffect(() => {
     setIsLoading(true);
 
-    const params: GetAktivitetsloggRequest = { ident: filterIdent };
+    const enscrypt = new JSEncrypt();
+    enscrypt.setPublicKey(
+      `-----BEGIN PUBLIC KEY-----\n${publicKey}\n-----END PUBLIC KEY-----`,
+    );
+    const ident = filterIdent && enscrypt.encrypt(filterIdent);
+
+    //}
+
+    const params: GetAktivitetsloggRequest = {
+      ident: ident == false ? undefined : ident,
+    };
 
     client.getAktivitetslogg(params).then((res) => {
       setAktivitetslogger(res);
@@ -53,6 +65,10 @@ export default function AktivitetsloggContainer() {
       });
     });
   }, [lastSeen, filterIdent]);
+
+  useEffect(() => {
+    client.getKeys().then((value) => setPublicKey(value._public));
+  }, [publicKey]);
 
   return (
     <>
