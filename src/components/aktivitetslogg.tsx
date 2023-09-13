@@ -11,7 +11,7 @@ import {
 import styles from "@/components/aktivitetslogg-tabell.module.css";
 import { HStack, Label, Select, TextField } from "@navikt/ds-react";
 import _ from "lodash";
-import { JSEncrypt } from "jsencrypt";
+//import { JSEncrypt } from "jsencrypt";
 
 const client = new AktivitetsloggApi(
   new Configuration({ basePath: process.env.NEXT_PUBLIC_API_PATH }),
@@ -45,6 +45,8 @@ export default function AktivitetsloggContainer() {
   useEffect(() => {
     setIsLoading(true);
 
+    const JSEncrypt = require("jsencrypt").default;
+
     const enscrypt = new JSEncrypt();
     enscrypt.setPublicKey(
       `-----BEGIN PUBLIC KEY-----\n${publicKey}\n-----END PUBLIC KEY-----`,
@@ -64,7 +66,7 @@ export default function AktivitetsloggContainer() {
         setIsLoading(false);
       });
     });
-  }, [lastSeen, filterIdent]);
+  }, [lastSeen, filterIdent, publicKey]);
 
   useEffect(() => {
     client.getKeys().then((value) => setPublicKey(value._public));
