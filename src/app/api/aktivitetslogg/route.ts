@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAktivitetsloggOboToken, getAzureSession } from "@/lib/auth";
+import { logger } from "@/app/api/logger";
 
 export const revalidate = 0;
 
@@ -20,6 +21,8 @@ export async function GET(request: Request) {
       Authorization: `Bearer ${await getAktivitetsloggOboToken(session)}`,
     },
   });
+
+  logger.info(`response: ${response}`);
 
   return NextResponse.json(await response.json());
 }
