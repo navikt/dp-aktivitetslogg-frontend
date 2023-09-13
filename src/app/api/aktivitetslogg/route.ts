@@ -21,9 +21,9 @@ export async function GET(request: Request) {
       Authorization: `Bearer ${await getAktivitetsloggOboToken(session)}`,
     },
   });
-  const s = await response.json();
-  logger.info(`response url: ${response.url}`);
   logger.info(`response status: ${response.status}`);
+  logger.info(`response url: ${response.url}`);
+  const s = await response.json();
   logger.info(`response json: ${JSON.stringify(s)}`);
 
   return NextResponse.json(s);
