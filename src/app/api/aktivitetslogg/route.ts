@@ -24,7 +24,7 @@ export async function GET(request: Request) {
   const s = await response.json();
   logger.info(`response url: ${response.url}`);
   logger.info(`response status: ${response.status}`);
-  logger.info(`response json: ${s}`);
+  logger.info(`response json: ${JSON.stringify(s)}`);
 
   return NextResponse.json(s);
 }
