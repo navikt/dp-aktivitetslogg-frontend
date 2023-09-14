@@ -9,15 +9,18 @@ import {
   GetAktivitetsloggRequest,
 } from "@/lib/aktivitetslogg-api";
 import styles from "@/components/aktivitetslogg-tabell.module.css";
-import { HStack, Label, Select, TextField } from "@navikt/ds-react";
+import { HStack, Label, Select } from "@navikt/ds-react";
 import _ from "lodash";
-//import { JSEncrypt } from "jsencrypt";
 
 const client = new AktivitetsloggApi(
   new Configuration({ basePath: process.env.NEXT_PUBLIC_API_PATH }),
 );
 
-export default function AktivitetsloggContainer() {
+export default function AktivitetsloggContainer({
+  identToSearchFor,
+}: {
+  identToSearchFor: string | undefined;
+}) {
   const [aktivitetslogger, setAktivitetslogger] = useState<Aktivitetslogg[]>(
     [],
   );
@@ -28,14 +31,12 @@ export default function AktivitetsloggContainer() {
   >(0);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [filterIdent, setIdentFilter] = useState<string | undefined>(undefined);
 
   const [filterHendelse, setHendelseFilter] = useState("");
-  const [publicKey, setPublicKey] = useState<string | undefined>(undefined);
-
-  const handleFilterChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setIdentFilter(event.target.value);
-  };
+  const [publicKey, setPublicKey] = useState<string | undefined>();
+  const [filtrerteAktiviteter, setFiltrerteAktiviteter] = useState<
+    Aktivitetslogg[]
+  >([]);
   const handleEventTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setHendelseFilter(event.target.value);
   };
@@ -51,9 +52,7 @@ export default function AktivitetsloggContainer() {
     enscrypt.setPublicKey(
       `-----BEGIN PUBLIC KEY-----\n${publicKey}\n-----END PUBLIC KEY-----`,
     );
-    const ident = filterIdent && enscrypt.encrypt(filterIdent);
-
-    //}
+    const ident = identToSearchFor && enscrypt.encrypt(identToSearchFor);
 
     const params: GetAktivitetsloggRequest = {
       ident: ident == false ? undefined : ident,
@@ -66,23 +65,24 @@ export default function AktivitetsloggContainer() {
         setIsLoading(false);
       });
     });
-  }, [lastSeen, filterIdent, publicKey]);
+  }, [lastSeen, identToSearchFor, publicKey]);
 
   useEffect(() => {
     client.getKeys().then((value) => setPublicKey(value._public));
   }, [publicKey]);
 
+  useEffect(() => {
+    setFiltrerteAktiviteter(
+      aktivitetslogger.filter((value) => {
+        if (filterHendelse === "") return true;
+        return value.hendelse.type === filterHendelse;
+      }),
+    );
+  }, [aktivitetslogger, filterHendelse]);
   return (
     <>
       <form className={styles.form}>
         <HStack gap={"4"} align={"start"}>
-          <TextField
-            type="text"
-            value={filterIdent}
-            onChange={handleFilterChange}
-            label="Filter på ident"
-            size={"small"}
-          />
           <Select
             label={"Hendelsetype"}
             defaultValue={filterHendelse}
@@ -105,10 +105,10 @@ export default function AktivitetsloggContainer() {
       </div>
       <div className={styles.antallAktiviteter}>
         <Label size={"small"}>
-          Antall aktiviteter i søk: {aktivitetslogger.length}
+          Antall aktiviteter i søk: {filtrerteAktiviteter.length}
         </Label>
       </div>
-      <AktivitetsloggTabell isLoading={isLoading} data={aktivitetslogger} />
+      <AktivitetsloggTabell isLoading={isLoading} data={filtrerteAktiviteter} />
     </>
   );
 }
