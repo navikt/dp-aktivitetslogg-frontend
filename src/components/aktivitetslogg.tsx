@@ -9,7 +9,7 @@ import {
   GetAktivitetsloggRequest,
 } from "@/lib/aktivitetslogg-api";
 import styles from "@/components/aktivitetslogg-tabell.module.css";
-import { HStack, Label, Select } from "@navikt/ds-react";
+import { Button, HStack, Label, Select } from "@navikt/ds-react";
 import _ from "lodash";
 
 const client = new AktivitetsloggApi(
@@ -107,7 +107,7 @@ export default function AktivitetsloggContainer({
   return (
     <>
       <form className={styles.form}>
-        <HStack gap={"4"} align={"start"}>
+        <HStack gap={"4"} align={"end"} justify={"start"}>
           <Select
             label={"Hendelsetype"}
             defaultValue={filterHendelse}
@@ -134,6 +134,16 @@ export default function AktivitetsloggContainer({
               </option>
             ))}
           </Select>
+          <Button
+            size="small"
+            variant="secondary-neutral"
+            onClick={() => {
+              setTjenesteFilter("");
+              setHendelseFilter("");
+            }}
+          >
+            Nullstill filter
+          </Button>
         </HStack>
       </form>
       <div className={styles.antallAktiviteter}>

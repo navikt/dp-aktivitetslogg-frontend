@@ -18,7 +18,7 @@ export default function AktivitetsloggTabell({
             <Table.HeaderCell scope="col">Tid</Table.HeaderCell>
             <Table.HeaderCell scope="col">Hendelses Type</Table.HeaderCell>
             <Table.HeaderCell scope="col">Hendelses ID</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Tjenester</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Tjeneste</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
