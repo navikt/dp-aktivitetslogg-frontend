@@ -10,11 +10,7 @@ import {
   Spacer,
 } from "@navikt/ds-react";
 import styles from "@/components/header.module.css";
-import { AktivitetsloggApi, Configuration } from "@/lib/aktivitetslogg-api";
-
-const client = new AktivitetsloggApi(
-  new Configuration({ basePath: process.env.NEXT_PUBLIC_API_PATH }),
-);
+import { client } from "@/app/aktivitetslogg/application-context";
 
 function Header({
   onSearchIdentChanged,

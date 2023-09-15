@@ -1,39 +1,48 @@
 "use client";
 
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useContext, useEffect, useState } from "react";
 import AktivitetsloggTabell from "./aktivitetslogg-tabell";
 import {
   Aktivitetslogg,
-  AktivitetsloggApi,
-  Configuration,
   GetAktivitetsloggRequest,
 } from "@/lib/aktivitetslogg-api";
 import styles from "@/components/aktivitetslogg-tabell.module.css";
-import { Button, HStack, Label, Select } from "@navikt/ds-react";
+import {
+  Button,
+  Checkbox,
+  HStack,
+  Label,
+  Select,
+  VStack,
+} from "@navikt/ds-react";
 import _ from "lodash";
-
-const client = new AktivitetsloggApi(
-  new Configuration({ basePath: process.env.NEXT_PUBLIC_API_PATH }),
-);
+import {
+  ApplicationContext,
+  client,
+  IApplicationContext,
+} from "@/app/aktivitetslogg/application-context";
 
 export default function AktivitetsloggContainer({
   identToSearchFor,
 }: {
   identToSearchFor: string | undefined;
 }) {
+  const { encryptIdent } = useContext<IApplicationContext>(ApplicationContext);
+
   const [aktivitetslogger, setAktivitetslogger] = useState<Aktivitetslogg[]>(
     [],
   );
-  const [lastSeen, setLastSeen] = useState<string | null>(null);
+  const [lastSeen, setLastSeen] = useState<string | undefined>(undefined);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [filterHendelse, setHendelseFilter] = useState("");
   const [filterTjeneste, setTjenesteFilter] = useState("");
-  const [publicKey, setPublicKey] = useState<string | undefined>();
+  // const [publicKey, setPublicKey] = useState<string | undefined>();
   const [filtrerteAktiviteter, setFiltrerteAktiviteter] = useState<
     Aktivitetslogg[]
   >([]);
+  const [waitForLoggs, setWaitForLoggs] = useState<boolean>(false);
   const onHendelseChanged = (event: ChangeEvent<HTMLSelectElement>): void => {
     setHendelseFilter(event.target.value);
   };
@@ -56,27 +65,21 @@ export default function AktivitetsloggContainer({
   useEffect(() => {
     setIsLoading(true);
 
-    const JSEncrypt = require("jsencrypt").default;
-
-    const enscrypt = new JSEncrypt();
-    enscrypt.setPublicKey(
-      `-----BEGIN PUBLIC KEY-----\n${publicKey}\n-----END PUBLIC KEY-----`,
-    );
-    const ident = identToSearchFor && enscrypt.encrypt(identToSearchFor);
-
     const params: GetAktivitetsloggRequest = {
-      ident: ident == false ? undefined : ident,
+      ident: encryptIdent(identToSearchFor),
+      since: lastSeen,
+      wait: waitForLoggs,
     };
 
     client.getAktivitetslogg(params).then((res) => {
-      setAktivitetslogger(res);
+      if (waitForLoggs) {
+        setAktivitetslogger((prevState) => [...res, ...prevState]);
+      } else {
+        setAktivitetslogger(res);
+      }
       setIsLoading(false);
     });
-  }, [lastSeen, identToSearchFor, publicKey]);
-
-  useEffect(() => {
-    client.getKeys().then((value) => setPublicKey(value._public));
-  }, [publicKey]);
+  }, [lastSeen, identToSearchFor]);
 
   useEffect(() => {
     setFiltrerteAktiviteter(
@@ -96,54 +99,79 @@ export default function AktivitetsloggContainer({
     );
   }, [aktivitetslogger, filterHendelse, filterTjeneste]);
 
+  useEffect(() => {
+    if (waitForLoggs) {
+      if (aktivitetslogger.length > 0) {
+        setLastSeen(aktivitetslogger[0].id!);
+      }
+    } else {
+      setLastSeen(undefined);
+    }
+  }, [waitForLoggs, aktivitetslogger]);
+
   return (
     <>
       <form className={styles.form}>
-        <HStack gap={"4"} align={"end"} justify={"start"}>
-          <Select
-            label={"Hendelsetype"}
-            defaultValue={filterHendelse}
-            onChange={onHendelseChanged}
-            size={"small"}
-          >
-            <option value="">Alle</option>
-            {hendelser.map((hendelse) => (
-              <option value={hendelse} key={hendelse}>
-                {hendelse}
-              </option>
-            ))}
-          </Select>
-          <Select
-            label={"Tjeneste"}
-            defaultValue={filterHendelse}
-            onChange={onTjenesteChanged}
-            size={"small"}
-          >
-            <option value="">Alle</option>
-            {tjenester.map((tjeneste) => (
-              <option value={tjeneste} key={tjeneste}>
-                {tjeneste}
-              </option>
-            ))}
-          </Select>
-          <Button
-            size="small"
-            variant="secondary-neutral"
-            onClick={() => {
-              setTjenesteFilter("");
-              setHendelseFilter("");
-            }}
-          >
-            Nullstill filter
-          </Button>
-        </HStack>
+        <VStack gap={"4"}>
+          <HStack gap={"4"} align={"end"} justify={"end"}>
+            <Select
+              label={"Hendelsetype"}
+              defaultValue={filterHendelse}
+              onChange={onHendelseChanged}
+              size={"small"}
+            >
+              <option value="">Alle</option>
+              {hendelser.map((hendelse) => (
+                <option value={hendelse} key={hendelse}>
+                  {hendelse}
+                </option>
+              ))}
+            </Select>
+            <Select
+              label={"Tjeneste"}
+              defaultValue={filterHendelse}
+              onChange={onTjenesteChanged}
+              size={"small"}
+            >
+              <option value="">Alle</option>
+              {tjenester.map((tjeneste) => (
+                <option value={tjeneste} key={tjeneste}>
+                  {tjeneste}
+                </option>
+              ))}
+            </Select>
+            <Checkbox
+              size={"small"}
+              onClick={() => setWaitForLoggs(!waitForLoggs)}
+              value={waitForLoggs}
+            >
+              Følg logg
+            </Checkbox>
+          </HStack>
+          <HStack gap={"4"} align={"end"} justify={"end"}>
+            <Button
+              size="small"
+              variant="secondary-neutral"
+              onClick={() => {
+                setTjenesteFilter("");
+                setHendelseFilter("");
+              }}
+            >
+              Nullstill filter
+            </Button>
+          </HStack>
+        </VStack>
       </form>
-      <div className={styles.antallAktiviteter}></div>
-      <div className={styles.antallAktiviteter}>
+      <VStack
+        justify={"end"}
+        align={"end"}
+        gap={"4"}
+        style={{ width: "100%", marginRight: "16px" }}
+      >
         <Label size={"small"}>
           Antall aktiviteter i søk: {filtrerteAktiviteter.length}
         </Label>
-      </div>
+      </VStack>
       <AktivitetsloggTabell isLoading={isLoading} data={filtrerteAktiviteter} />
     </>
   );
