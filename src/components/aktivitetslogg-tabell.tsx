@@ -1,16 +1,6 @@
-import React, { ChangeEvent, useState } from "react";
-import {
-  HStack,
-  Label,
-  Select,
-  Skeleton,
-  Table,
-  TextField,
-  Tooltip,
-} from "@navikt/ds-react";
+import React from "react";
+import { Skeleton, Table, Tooltip } from "@navikt/ds-react";
 import { Aktivitet, Aktivitetslogg, Kontekst } from "@/lib/aktivitetslogg-api";
-import _ from "lodash";
-import styles from "@/components/aktivitetslogg-tabell.module.css";
 
 export default function AktivitetsloggTabell({
   isLoading,
@@ -25,10 +15,10 @@ export default function AktivitetsloggTabell({
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell />
-            <Table.HeaderCell scope="col">Timestamp</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Event Type</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Event ID</Table.HeaderCell>
-            <Table.HeaderCell scope="col">System</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Tid</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Hendelses Type</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Hendelses ID</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Tjenester</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>

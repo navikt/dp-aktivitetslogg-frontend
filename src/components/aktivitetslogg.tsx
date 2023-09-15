@@ -33,15 +33,29 @@ export default function AktivitetsloggContainer({
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [filterHendelse, setHendelseFilter] = useState("");
+  const [filterTjeneste, setTjenesteFilter] = useState("");
   const [publicKey, setPublicKey] = useState<string | undefined>();
   const [filtrerteAktiviteter, setFiltrerteAktiviteter] = useState<
     Aktivitetslogg[]
   >([]);
-  const handleEventTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
+  const onHendelseChanged = (event: ChangeEvent<HTMLSelectElement>): void => {
     setHendelseFilter(event.target.value);
   };
 
-  const hendelser = _.uniq(aktivitetslogger.map((item) => item.hendelse.type));
+  const onTjenesteChanged = (event: ChangeEvent<HTMLSelectElement>): void => {
+    setTjenesteFilter(event.target.value);
+  };
+
+  const hendelser = _.uniq(
+    filtrerteAktiviteter.map((item) => item.hendelse.type),
+  );
+  const tjenester = _.uniq(
+    filtrerteAktiviteter
+      .flatMap((aktivitet) =>
+        aktivitet.systemParticipatingServices.map((value) => value.service),
+      )
+      .filter((value) => value !== "dp-aktivitetslogg"),
+  );
 
   useEffect(() => {
     setIsLoading(true);
@@ -73,12 +87,23 @@ export default function AktivitetsloggContainer({
 
   useEffect(() => {
     setFiltrerteAktiviteter(
-      aktivitetslogger.filter((value) => {
-        if (filterHendelse === "") return true;
-        return value.hendelse.type === filterHendelse;
-      }),
+      aktivitetslogger
+        .filter((value) => {
+          if (filterHendelse === "") return true;
+          return value.hendelse.type === filterHendelse;
+        })
+        .filter((value) => {
+          if (filterTjeneste === "") return true;
+          const participatingServices =
+            value.systemParticipatingServices.filter(
+              (value1) => value1.service === filterTjeneste,
+            );
+          console.log("participatingServices", participatingServices);
+          return participatingServices.length > 0;
+        }),
     );
-  }, [aktivitetslogger, filterHendelse]);
+  }, [aktivitetslogger, filterHendelse, filterTjeneste]);
+
   return (
     <>
       <form className={styles.form}>
@@ -86,13 +111,26 @@ export default function AktivitetsloggContainer({
           <Select
             label={"Hendelsetype"}
             defaultValue={filterHendelse}
-            onChange={handleEventTypeChange}
+            onChange={onHendelseChanged}
             size={"small"}
           >
             <option value="">Alle</option>
             {hendelser.map((hendelse) => (
               <option value={hendelse} key={hendelse}>
                 {hendelse}
+              </option>
+            ))}
+          </Select>
+          <Select
+            label={"Tjeneste"}
+            defaultValue={filterHendelse}
+            onChange={onTjenesteChanged}
+            size={"small"}
+          >
+            <option value="">Alle</option>
+            {tjenester.map((tjeneste) => (
+              <option value={tjeneste} key={tjeneste}>
+                {tjeneste}
               </option>
             ))}
           </Select>
