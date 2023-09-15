@@ -26,10 +26,6 @@ export default function AktivitetsloggContainer({
   );
   const [lastSeen, setLastSeen] = useState<string | null>(null);
 
-  const [totaltAntallAktiviteter, setTotaltAntallAktiviteter] = useState<
-    number | undefined
-  >(0);
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [filterHendelse, setHendelseFilter] = useState("");
@@ -74,10 +70,7 @@ export default function AktivitetsloggContainer({
 
     client.getAktivitetslogg(params).then((res) => {
       setAktivitetslogger(res);
-      client.getAntallAktiviteter().then((response) => {
-        setTotaltAntallAktiviteter(response.antall);
-        setIsLoading(false);
-      });
+      setIsLoading(false);
     });
   }, [lastSeen, identToSearchFor, publicKey]);
 
@@ -98,7 +91,6 @@ export default function AktivitetsloggContainer({
             value.systemParticipatingServices.filter(
               (value1) => value1.service === filterTjeneste,
             );
-          console.log("participatingServices", participatingServices);
           return participatingServices.length > 0;
         }),
     );
@@ -146,11 +138,7 @@ export default function AktivitetsloggContainer({
           </Button>
         </HStack>
       </form>
-      <div className={styles.antallAktiviteter}>
-        <Label size={"small"}>
-          Totalt antall aktiviteter: {totaltAntallAktiviteter}
-        </Label>
-      </div>
+      <div className={styles.antallAktiviteter}></div>
       <div className={styles.antallAktiviteter}>
         <Label size={"small"}>
           Antall aktiviteter i søk: {filtrerteAktiviteter.length}

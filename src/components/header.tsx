@@ -1,11 +1,20 @@
 "use client";
 
-import React, { createContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "@navikt/ds-css";
-import { InternalHeader, Search, Spacer } from "@navikt/ds-react";
+import {
+  HStack,
+  InternalHeader,
+  Label,
+  Search,
+  Spacer,
+} from "@navikt/ds-react";
 import styles from "@/components/header.module.css";
+import { AktivitetsloggApi, Configuration } from "@/lib/aktivitetslogg-api";
 
-export const SearchIdentContext = createContext<string | undefined>(undefined);
+const client = new AktivitetsloggApi(
+  new Configuration({ basePath: process.env.NEXT_PUBLIC_API_PATH }),
+);
 
 function Header({
   onSearchIdentChanged,
@@ -16,12 +25,19 @@ function Header({
   const [searchIdentInput, setSearchIdentInput] = useState<string | undefined>(
     undefined,
   );
-  const [searchIdent, setSearchIdent] = useState<string | undefined>(undefined);
+
+  const [totaltAntallAktiviteter, setTotaltAntallAktiviteter] = useState<
+    number | undefined
+  >(0);
 
   useEffect(() => {
     fetch("/api/me")
       .then((value) => value.json())
       .then((value) => setFulltNavn(`${value.givenName} ${value.surname}`));
+
+    client.getAntallAktiviteter().then((response) => {
+      setTotaltAntallAktiviteter(response.antall);
+    });
   }, []);
 
   const onClear = () => {
@@ -30,7 +46,11 @@ function Header({
   return (
     <InternalHeader>
       <InternalHeader.Title as="h1">Aktivitetslogg</InternalHeader.Title>
-      <SearchIdentContext.Provider value={searchIdent}>
+      <HStack
+        align={"center"}
+        justify={"space-between"}
+        style={{ width: "100%", marginRight: "16px" }}
+      >
         <form
           className={styles.searchBox}
           onSubmit={(e) => {
@@ -49,7 +69,10 @@ function Header({
             onClear={onClear}
           />
         </form>
-      </SearchIdentContext.Provider>
+        <Label size={"small"}>
+          Totalt antall aktiviteter: {totaltAntallAktiviteter}
+        </Label>
+      </HStack>
       <Spacer />
       <InternalHeader.User name={fulltNavn} />
     </InternalHeader>
