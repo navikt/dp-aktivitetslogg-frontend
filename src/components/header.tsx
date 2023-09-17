@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "@navikt/ds-css";
 import {
   HStack,
@@ -10,17 +10,15 @@ import {
   Spacer,
 } from "@navikt/ds-react";
 import styles from "@/components/header.module.css";
-import { client } from "@/app/aktivitetslogg/application-context";
+import {
+  ApplicationContext,
+  client,
+} from "@/app/aktivitetslogg/application-context";
 
-function Header({
-  onSearchIdentChanged,
-}: {
-  onSearchIdentChanged: (ident: string | undefined) => void;
-}) {
+function Header() {
   const [fulltNavn, setFulltNavn] = useState<string>("");
-  const [searchIdentInput, setSearchIdentInput] = useState<string | undefined>(
-    undefined,
-  );
+  const [ident, setIdent] = useState<string | undefined>(undefined);
+  const { setIdentToSearchFor } = useContext(ApplicationContext);
 
   const [totaltAntallAktiviteter, setTotaltAntallAktiviteter] = useState<
     number | undefined
@@ -37,7 +35,7 @@ function Header({
   }, []);
 
   const onClear = () => {
-    onSearchIdentChanged(undefined);
+    setIdentToSearchFor(undefined);
   };
   return (
     <InternalHeader>
@@ -51,7 +49,7 @@ function Header({
           className={styles.searchBox}
           onSubmit={(e) => {
             e.preventDefault();
-            onSearchIdentChanged(searchIdentInput);
+            setIdentToSearchFor(ident);
           }}
         >
           <Search
@@ -60,8 +58,8 @@ function Header({
             size="small"
             variant="simple"
             placeholder="Søk på ident"
-            onChange={(e) => setSearchIdentInput(e)}
-            value={searchIdentInput}
+            onChange={(e) => setIdent(e)}
+            value={ident}
             onClear={onClear}
           />
         </form>

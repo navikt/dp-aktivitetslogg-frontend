@@ -13,9 +13,9 @@ const AktivitetsloggPage: NextPage = ({}) => {
   return (
     <main>
       <ApplicationContextProvider>
-        <Header onSearchIdentChanged={setIdentToSearch} />
+        <Header />
         <div className={styles.main}>
-          <AktivitetsloggContainer identToSearchFor={identToSearch} />
+          <AktivitetsloggContainer />
         </div>
       </ApplicationContextProvider>
     </main>

@@ -22,27 +22,22 @@ import {
   IApplicationContext,
 } from "@/app/aktivitetslogg/application-context";
 
-export default function AktivitetsloggContainer({
-  identToSearchFor,
-}: {
-  identToSearchFor: string | undefined;
-}) {
-  const { encryptIdent } = useContext<IApplicationContext>(ApplicationContext);
+export default function AktivitetsloggContainer() {
+  const { encryptIdent, identToSearchFor } =
+    useContext<IApplicationContext>(ApplicationContext);
 
   const [aktivitetslogger, setAktivitetslogger] = useState<Aktivitetslogg[]>(
     [],
   );
   const [lastSeen, setLastSeen] = useState<string | undefined>(undefined);
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
   const [filterHendelse, setHendelseFilter] = useState("");
   const [filterTjeneste, setTjenesteFilter] = useState("");
-  // const [publicKey, setPublicKey] = useState<string | undefined>();
   const [filtrerteAktiviteter, setFiltrerteAktiviteter] = useState<
     Aktivitetslogg[]
   >([]);
   const [waitForLoggs, setWaitForLoggs] = useState<boolean>(false);
+
   const onHendelseChanged = (event: ChangeEvent<HTMLSelectElement>): void => {
     setHendelseFilter(event.target.value);
   };

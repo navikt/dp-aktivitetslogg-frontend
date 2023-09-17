@@ -3,22 +3,25 @@ import { AktivitetsloggApi, Configuration } from "@/lib/aktivitetslogg-api";
 
 export interface IApplicationContext {
   encryptIdent: (ident: string | undefined) => string | undefined;
+  identToSearchFor?: string;
+  setIdentToSearchFor: (ident: string | undefined) => void;
 }
 
 export const client = new AktivitetsloggApi(
   new Configuration({ basePath: process.env.NEXT_PUBLIC_API_PATH }),
 );
 export const ApplicationContext = createContext<IApplicationContext>({
-  encryptIdent: (ident) => {
-    return undefined;
-  },
+  encryptIdent: (ident) => undefined,
+  setIdentToSearchFor: (ident) => {},
 });
 
 export const ApplicationContextProvider = ({
   children,
 }: PropsWithChildren<{}>) => {
   const [publicKey, setPublicKey] = useState<string | undefined>(undefined);
-
+  const [identToSearchFor, setIdentToSearchFor] = useState<string | undefined>(
+    undefined,
+  );
   useEffect(() => {
     client.getKeys().then((value) => setPublicKey(value._public));
   }, []);
@@ -36,7 +39,9 @@ export const ApplicationContextProvider = ({
   };
 
   return (
-    <ApplicationContext.Provider value={{ encryptIdent }}>
+    <ApplicationContext.Provider
+      value={{ encryptIdent, identToSearchFor, setIdentToSearchFor }}
+    >
       {children}
     </ApplicationContext.Provider>
   );
