@@ -10,10 +10,7 @@ import {
   Spacer,
 } from "@navikt/ds-react";
 import styles from "@/components/header.module.css";
-import {
-  ApplicationContext,
-  client,
-} from "@/app/aktivitetslogg/application-context";
+import { ApplicationContext } from "@/app/aktivitetslogg/application-context";
 
 function Header() {
   const [ident, setIdent] = useState<string | undefined>(undefined);
