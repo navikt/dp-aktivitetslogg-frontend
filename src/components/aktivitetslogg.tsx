@@ -18,9 +18,9 @@ import {
 import _ from "lodash";
 import {
   ApplicationContext,
-  client,
   IApplicationContext,
 } from "@/app/aktivitetslogg/application-context";
+import { client } from "@/lib/client";
 
 export default function AktivitetsloggContainer() {
   const { encryptIdent, identToSearchFor } =

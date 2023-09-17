@@ -1,29 +1,51 @@
 import { createContext, PropsWithChildren, useEffect, useState } from "react";
-import { AktivitetsloggApi, Configuration } from "@/lib/aktivitetslogg-api";
+import { client } from "@/lib/client";
 
 export interface IApplicationContext {
   encryptIdent: (ident: string | undefined) => string | undefined;
   identToSearchFor?: string;
   setIdentToSearchFor: (ident: string | undefined) => void;
+  fulltNavn: string;
+  totaltAntallAktiviteter: number;
 }
 
-export const client = new AktivitetsloggApi(
-  new Configuration({ basePath: process.env.NEXT_PUBLIC_API_PATH }),
-);
-export const ApplicationContext = createContext<IApplicationContext>({
+const defaultApplicationContext: IApplicationContext = {
   encryptIdent: (ident) => undefined,
+  identToSearchFor: undefined,
   setIdentToSearchFor: (ident) => {},
-});
+  fulltNavn: "",
+  totaltAntallAktiviteter: 0,
+};
+
+export const ApplicationContext = createContext<IApplicationContext>(
+  defaultApplicationContext,
+);
 
 export const ApplicationContextProvider = ({
   children,
 }: PropsWithChildren<{}>) => {
   const [publicKey, setPublicKey] = useState<string | undefined>(undefined);
   const [identToSearchFor, setIdentToSearchFor] = useState<string | undefined>(
-    undefined,
+    defaultApplicationContext.identToSearchFor,
   );
+  const [fulltNavn, setFulltNavn] = useState<string>(
+    defaultApplicationContext.fulltNavn,
+  );
+  const [totaltAntallAktiviteter, setTotaltAntallAktiviteter] =
+    useState<number>(defaultApplicationContext.totaltAntallAktiviteter);
+
   useEffect(() => {
     client.getKeys().then((value) => setPublicKey(value._public));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/me")
+      .then((value) => value.json())
+      .then((value) => setFulltNavn(`${value.givenName} ${value.surname}`));
+
+    client.getAntallAktiviteter().then((response) => {
+      setTotaltAntallAktiviteter(response.antall || 0);
+    });
   }, []);
 
   const encryptIdent = (ident: string | undefined): string | undefined => {
@@ -40,7 +62,13 @@ export const ApplicationContextProvider = ({
 
   return (
     <ApplicationContext.Provider
-      value={{ encryptIdent, identToSearchFor, setIdentToSearchFor }}
+      value={{
+        encryptIdent,
+        identToSearchFor,
+        setIdentToSearchFor,
+        fulltNavn,
+        totaltAntallAktiviteter,
+      }}
     >
       {children}
     </ApplicationContext.Provider>

@@ -16,23 +16,9 @@ import {
 } from "@/app/aktivitetslogg/application-context";
 
 function Header() {
-  const [fulltNavn, setFulltNavn] = useState<string>("");
   const [ident, setIdent] = useState<string | undefined>(undefined);
-  const { setIdentToSearchFor } = useContext(ApplicationContext);
-
-  const [totaltAntallAktiviteter, setTotaltAntallAktiviteter] = useState<
-    number | undefined
-  >(0);
-
-  useEffect(() => {
-    fetch("/api/me")
-      .then((value) => value.json())
-      .then((value) => setFulltNavn(`${value.givenName} ${value.surname}`));
-
-    client.getAntallAktiviteter().then((response) => {
-      setTotaltAntallAktiviteter(response.antall);
-    });
-  }, []);
+  const { setIdentToSearchFor, fulltNavn, totaltAntallAktiviteter } =
+    useContext(ApplicationContext);
 
   const onClear = () => {
     setIdentToSearchFor(undefined);
