@@ -68,13 +68,15 @@ export default function AktivitetsloggContainer() {
 
     client.getAktivitetslogg(params).then((res) => {
       if (waitForLoggs) {
-        setAktivitetslogger((prevState) => [...res, ...prevState]);
+        setAktivitetslogger((prevState) =>
+          _.uniqBy([...res, ...prevState], (value) => value.id),
+        );
       } else {
         setAktivitetslogger(res);
       }
       setIsLoading(false);
     });
-  }, [lastSeen, identToSearchFor]);
+  }, [lastSeen, identToSearchFor, waitForLoggs]);
 
   useEffect(() => {
     setFiltrerteAktiviteter(
