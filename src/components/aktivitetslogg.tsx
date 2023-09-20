@@ -58,7 +58,7 @@ export default function AktivitetsloggContainer() {
   );
 
   useEffect(() => {
-    setIsLoading(true);
+    setIsLoading(!waitForLoggs);
 
     const params: GetAktivitetsloggRequest = {
       ident: encryptIdent(identToSearchFor),
