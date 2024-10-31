@@ -1,4 +1,4 @@
-FROM node:18-alpine AS runtime
+FROM gcr.io/distroless/nodejs22-debian12 AS runtime
 WORKDIR /usr/src/app
 
 ENV PORT=3000 \
