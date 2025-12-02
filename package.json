@@ -31,7 +31,7 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.18.4",
+    "@openapitools/openapi-generator-cli": "^2.25.2",
     "@types/lodash": "^4.17.16",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.5",
