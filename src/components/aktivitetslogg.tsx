@@ -1,6 +1,12 @@
 "use client";
 
-import React, { ChangeEvent, useContext, useEffect, useState } from "react";
+import React, {
+  ChangeEvent,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+} from "react";
 import AktivitetsloggTabell from "./aktivitetslogg-tabell";
 import {
   Aktivitetslogg,
@@ -26,17 +32,37 @@ export default function AktivitetsloggContainer() {
   const { encryptIdent, identToSearchFor } =
     useContext<IApplicationContext>(ApplicationContext);
 
+  const ident = encryptIdent(identToSearchFor);
+
   const [aktivitetslogger, setAktivitetslogger] = useState<Aktivitetslogg[]>(
     [],
   );
-  const [lastSeen, setLastSeen] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [filterHendelse, setHendelseFilter] = useState("");
   const [filterTjeneste, setTjenesteFilter] = useState("");
-  const [filtrerteAktiviteter, setFiltrerteAktiviteter] = useState<
-    Aktivitetslogg[]
-  >([]);
-  const [waitForLoggs, setWaitForLoggs] = useState<boolean>(false);
+  const [waitForLogs, setWaitForLogs] = useState<boolean>(false);
+
+  const lastSeen = useMemo(() => {
+    if (waitForLogs && aktivitetslogger.length > 0) {
+      return aktivitetslogger[0].id!;
+    }
+    return undefined;
+  }, [waitForLogs, aktivitetslogger]);
+
+  const filtrerteAktiviteter = useMemo(() => {
+    return aktivitetslogger
+      .filter((value) => {
+        if (filterHendelse === "") return true;
+        return value.hendelse.type === filterHendelse;
+      })
+      .filter((value) => {
+        if (filterTjeneste === "") return true;
+        const participatingServices = value.systemParticipatingServices.filter(
+          (value1) => value1.service === filterTjeneste,
+        );
+        return participatingServices.length > 0;
+      });
+  }, [aktivitetslogger, filterHendelse, filterTjeneste]);
 
   const onHendelseChanged = (event: ChangeEvent<HTMLSelectElement>): void => {
     setHendelseFilter(event.target.value);
@@ -58,53 +84,33 @@ export default function AktivitetsloggContainer() {
   );
 
   useEffect(() => {
-    setIsLoading(!waitForLoggs);
+    const fetchData = async () => {
+      if (!waitForLogs) {
+        setIsLoading(true);
+      }
 
-    const params: GetAktivitetsloggRequest = {
-      ident: encryptIdent(identToSearchFor),
-      since: lastSeen,
-      wait: waitForLoggs,
+      const params: GetAktivitetsloggRequest = {
+        ident: ident,
+        since: lastSeen,
+        wait: waitForLogs,
+      };
+
+      try {
+        const res = await client.getAktivitetslogg(params);
+        if (waitForLogs) {
+          setAktivitetslogger((prevState) =>
+            _.uniqBy([...res, ...prevState], (value) => value.id),
+          );
+        } else {
+          setAktivitetslogger(res);
+        }
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    client.getAktivitetslogg(params).then((res) => {
-      if (waitForLoggs) {
-        setAktivitetslogger((prevState) =>
-          _.uniqBy([...res, ...prevState], (value) => value.id),
-        );
-      } else {
-        setAktivitetslogger(res);
-      }
-      setIsLoading(false);
-    });
-  }, [lastSeen, identToSearchFor, waitForLoggs]);
-
-  useEffect(() => {
-    setFiltrerteAktiviteter(
-      aktivitetslogger
-        .filter((value) => {
-          if (filterHendelse === "") return true;
-          return value.hendelse.type === filterHendelse;
-        })
-        .filter((value) => {
-          if (filterTjeneste === "") return true;
-          const participatingServices =
-            value.systemParticipatingServices.filter(
-              (value1) => value1.service === filterTjeneste,
-            );
-          return participatingServices.length > 0;
-        }),
-    );
-  }, [aktivitetslogger, filterHendelse, filterTjeneste]);
-
-  useEffect(() => {
-    if (waitForLoggs) {
-      if (aktivitetslogger.length > 0) {
-        setLastSeen(aktivitetslogger[0].id!);
-      }
-    } else {
-      setLastSeen(undefined);
-    }
-  }, [waitForLoggs, aktivitetslogger]);
+    fetchData();
+  }, [lastSeen, ident, waitForLogs]);
 
   return (
     <>
@@ -139,8 +145,8 @@ export default function AktivitetsloggContainer() {
             </Select>
             <Checkbox
               size={"small"}
-              onClick={() => setWaitForLoggs(!waitForLoggs)}
-              value={waitForLoggs}
+              onClick={() => setWaitForLogs(!waitForLogs)}
+              value={waitForLogs}
             >
               Følg logg
             </Checkbox>
