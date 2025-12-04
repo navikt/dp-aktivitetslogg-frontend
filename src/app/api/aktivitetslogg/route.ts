@@ -16,9 +16,13 @@ export async function GET(request: Request) {
     process.env.API_BASE_URL || "http://dp-aktivitetslogg/aktivitetslogg",
   );
   url.search = searchParams.toString();
+  const oboToken = await getOboToken(token);
+  if (!oboToken) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const response = await fetch(url, {
     headers: {
-      Authorization: `Bearer ${await getOboToken(token)}`,
+      Authorization: `Bearer ${oboToken}`,
     },
   });
   logger.info(`response status: ${response.status}`);
