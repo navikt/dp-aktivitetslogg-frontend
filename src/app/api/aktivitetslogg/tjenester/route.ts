@@ -4,9 +4,9 @@ import { getOboToken, getAzureToken } from "@/lib/auth";
 export const revalidate = 0;
 
 export async function GET(request: Request) {
-  const session = await getAzureToken(request);
+  const token = await getAzureToken(request);
 
-  if (!session)
+  if (!token)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const url = new URL(
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   url.pathname = `${url.pathname}/tjenester`;
   const response = await fetch(url, {
     headers: {
-      Authorization: `Bearer ${await getOboToken(session)}`,
+      Authorization: `Bearer ${await getOboToken(token)}`,
     },
   });
 
