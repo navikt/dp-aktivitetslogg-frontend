@@ -1,36 +1,43 @@
-import type {
-  GetSessionWithOboProvider,
-  SessionWithOboProvider,
-} from "@navikt/dp-auth";
-import { makeSession } from "@navikt/dp-auth";
-import { azure } from "@navikt/dp-auth/identity-providers";
-import { azure as azureOBO } from "@navikt/dp-auth/obo-providers";
+import {
+  getToken,
+  requestOboToken,
+  TokenResult,
+  validateAzureToken,
+} from "@navikt/oasis";
 
 const fallbackToken =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
 
-export let getAzureSession: GetSessionWithOboProvider;
-
-if (process.env.IS_LOCALHOST === "true") {
-  getAzureSession = makeSession({
-    identityProvider: async () => fallbackToken,
-    oboProvider: async (token: string, audience: string) => token + audience,
-  });
-} else {
-  getAzureSession = makeSession({
-    identityProvider: azure,
-    oboProvider: azureOBO,
-  });
-}
-
-export async function getAktivitetsloggOboToken(
-  session: SessionWithOboProvider,
-) {
+export let getAzureToken = async (request: Request): Promise<string | null> => {
   if (process.env.IS_LOCALHOST === "true") {
     return process.env.DP_AKTIVITETSLOGG_TOKEN || fallbackToken;
-  } else {
-    const audience = `api://${process.env.NAIS_CLUSTER_NAME}.teamdagpenger.dp-aktivitetslogg/.default`;
-    const oboToken = await session.apiToken(audience);
-    return oboToken;
   }
+
+  const token = getToken(request);
+  if (!token) {
+    return null;
+  }
+  const valid = await validateAzureToken(token);
+  if (!valid.ok) {
+    return null;
+  }
+  return token;
+};
+
+export async function getOboToken(
+  token: string,
+  audience?: string,
+): Promise<TokenResult> {
+  if (process.env.IS_LOCALHOST === "true") {
+    return {
+      ok: true,
+      token: process.env.DP_AKTIVITETSLOGG_TOKEN || fallbackToken,
+    };
+  }
+  if (audience) {
+    return await requestOboToken(token, audience);
+  }
+  const aktivitetsloggAudience = `api://${process.env.NAIS_CLUSTER_NAME}.teamdagpenger.dp-aktivitetslogg/.default`;
+  const oboToken = await requestOboToken(token, aktivitetsloggAudience);
+  return oboToken;
 }

@@ -1,10 +1,11 @@
-import { getAzureSession } from "@/lib/auth";
+import { getAzureToken } from "@/lib/auth";
+import { requestOboToken } from "@navikt/oasis";
 
 export async function authorizeUser(request: Request): Promise<object> {
-  const session = await getAzureSession(request);
+  const session = await getAzureToken(request);
 
   // Wonderwall tar seg av session, hvis vi ikke har en session kjører vi uten sidecar og skal være i dev
-  if (!session || session.expiresIn === 0) {
+  if (!session) {
     return {
       givenName: "Skogs",
       surname: "Matrosen",
@@ -12,7 +13,8 @@ export async function authorizeUser(request: Request): Promise<object> {
   }
 
   try {
-    const oboToken = await session.apiToken(
+    const oboToken = await requestOboToken(
+      session,
       "https://graph.microsoft.com/.default",
     );
     const data = await fetch(

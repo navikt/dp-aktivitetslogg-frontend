@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
-import { getAktivitetsloggOboToken, getAzureSession } from "@/lib/auth";
+import { getAzureToken, getOboToken } from "@/lib/auth";
 import { logger } from "@/app/api/logger";
 
 export const revalidate = 0;
 
 export async function GET(request: Request) {
-  const session = await getAzureSession(request);
+  const token = await getAzureToken(request);
 
-  if (!session)
+  if (!token)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(request.url);
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   url.search = searchParams.toString();
   const response = await fetch(url, {
     headers: {
-      Authorization: `Bearer ${await getAktivitetsloggOboToken(session)}`,
+      Authorization: `Bearer ${await getOboToken(token)}`,
     },
   });
   logger.info(`response status: ${response.status}`);

@@ -6,42 +6,46 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "test": "next lint",
+    "lint": "eslint .",
+    "test": "eslint .",
     "prepare": "husky install && npm run generate-api-types",
     "generate-api-types": "openapi-generator-cli generate",
     "port-forward": "kubectl -n teamdagpenger port-forward svc/dp-aktivitetslogg 8081:80"
   },
   "dependencies": {
-    "@navikt/dp-auth": "^0.3.15",
-    "@navikt/ds-css": "^7.17.2",
-    "@navikt/ds-react": "^7.17.2",
-    "@navikt/ds-tokens": "^7.17.2",
-    "@types/node": "22.13.13",
-    "@types/react": "19.0.12",
-    "@types/react-dom": "19.0.4",
-    "eslint": "9.23.0",
-    "eslint-config-next": "15.2.4",
-    "jsencrypt": "^3.3.2",
+    "@navikt/ds-css": "^7.35.0",
+    "@navikt/ds-react": "^7.35.0",
+    "@navikt/ds-tokens": "^7.35.0",
+    "@navikt/oasis": "^4.1.1",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.1",
+    "eslint-config-next": "16.0.7",
+    "jsencrypt": "^3.5.4",
     "lodash": "^4.17.21",
-    "next": "^15.2.4",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
-    "typescript": "5.8.2",
-    "winston": "^3.17.0"
+    "next": "16.0.7",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "typescript": "5.9.3",
+    "winston": "^3.18.3"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.18.4",
-    "@types/lodash": "^4.17.16",
-    "eslint-config-prettier": "^10.1.1",
-    "eslint-plugin-prettier": "^5.2.5",
+    "@openapitools/openapi-generator-cli": "^2.25.2",
+    "@types/lodash": "^4.17.21",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "husky": "^9.1.7",
-    "lint-staged": "^15.5.0",
-    "prettier": "^3.5.3"
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx}": [
       "eslint"
     ]
+  },
+  "overrides": {
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3"
   }
 }

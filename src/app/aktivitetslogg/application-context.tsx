@@ -49,7 +49,7 @@ export const ApplicationContextProvider = ({
   }, []);
 
   const encryptIdent = (ident: string | undefined): string | undefined => {
-    const JSEncrypt = require("jsencrypt").default;
+    const JSEncrypt = require("jsencrypt");
 
     const enscrypt = new JSEncrypt();
     enscrypt.setPublicKey(

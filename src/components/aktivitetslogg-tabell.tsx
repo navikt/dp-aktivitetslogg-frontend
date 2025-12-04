@@ -101,7 +101,7 @@ function SkeletonRow() {
           <Skeleton />
         </Table.DataCell>
       </Table.ExpandableRow>
-      <Table.ExpandableRow key={1} expandOnRowClick={false} content={<div />}>
+      <Table.ExpandableRow key={2} expandOnRowClick={false} content={<div />}>
         <Table.DataCell scope="row">
           <Skeleton />
         </Table.DataCell>
