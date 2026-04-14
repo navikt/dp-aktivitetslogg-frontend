@@ -2,7 +2,7 @@
   "name": "dp-aktivitetslogg-frontend",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@10.32.1",
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -17,27 +17,27 @@
     "@navikt/ds-css": "^7.35.0",
     "@navikt/ds-react": "^7.35.0",
     "@navikt/ds-tokens": "^7.35.0",
-    "@navikt/oasis": "^4.1.1",
+    "@navikt/oasis": "^4.1.4",
     "@types/node": "24.10.1",
-    "@types/react": "19.2.7",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "eslint": "9.39.1",
+    "eslint": "10.2.0",
     "eslint-config-next": "16.0.7",
     "jsencrypt": "^3.5.4",
-    "lodash": "^4.17.21",
+    "lodash": "^4.18.1",
     "next": "16.0.7",
     "react": "19.2.1",
     "react-dom": "19.2.1",
-    "typescript": "5.9.3",
-    "winston": "^3.18.3"
+    "typescript": "6.0.2",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.31.1",
-    "@types/lodash": "^4.17.21",
+    "@types/lodash": "^4.17.24",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-prettier": "^5.5.5",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.7.4"
   },
   "lint-staged": {
@@ -46,7 +46,7 @@
     ]
   },
   "overrides": {
-    "@types/react": "19.2.7",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3"
   }
 }
