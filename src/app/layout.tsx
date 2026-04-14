@@ -1,5 +1,4 @@
-import "./globals.css";
-import "@navikt/ds-css/dist/index.css";
+import "@navikt/ds-tokens/dist/tokens.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
