@@ -41,6 +41,4 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Run linters
-        uses: wearerequired/lint-action@v2
-        with:
-          eslint: true
+        run: pnpm run lint
