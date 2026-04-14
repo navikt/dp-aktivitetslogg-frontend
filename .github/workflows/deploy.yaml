@@ -13,16 +13,31 @@ jobs:
       contents: "read"
       id-token: "write"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          registry-url: https://npm.pkg.github.com/
+      - name: Checkout code
+        uses: actions/checkout@v6
 
-      - run: npm ci --ignore-scripts
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.x"
+          cache: "pnpm"
+          registry-url: "https://npm.pkg.github.com"
+
+      - name: Cache node_modules
+        uses: actions/cache@v5
+        id: node_modules
+        with:
+          path: ./node_modules
+          key: modules-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - run: npm install --frozen-lockfile
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
-      - run: npm rebuild && npm run prepare
-      - run: npm run build
+      - run: pnpm rebuild && pnpm run prepare
+      - run: pnpm run build
       - run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json
 
       - name: docker-build-push
