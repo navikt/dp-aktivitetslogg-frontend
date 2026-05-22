@@ -20,7 +20,6 @@ import {
   ExpansionCard,
   HStack,
   VStack,
-  Tag,
   ReadMore,
   List,
   InlineMessage,
@@ -49,10 +48,6 @@ function formaterKortTidspunkt(iso?: string): string | undefined {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function formaterHendelsesnavn(hendelse: string): string {
-  return hendelse.replace(/_/g, " ").replace(/\b\w/, (c) => c.toUpperCase());
 }
 
 interface Props {
@@ -105,11 +100,6 @@ function BehandlingKort({ behandling }: { behandling: BehandlingGruppe }) {
         </ExpansionCard.Title>
         <ExpansionCard.Description>
           <HStack gap="space-2" wrap align="center">
-            {behandling.hendelser.slice(0, 4).map((hendelse) => (
-              <Tag key={hendelse} variant="neutral" size="xsmall">
-                {formaterHendelsesnavn(hendelse)}
-              </Tag>
-            ))}
             {tidsrom && (
               <Detail as="span" className={styles.tidsrom}>
                 {tidsrom}

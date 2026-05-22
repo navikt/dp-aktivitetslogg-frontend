@@ -86,6 +86,14 @@ const MOTTOK_SVAR_REGEX = /^Mottok svar på opplysning om (.+)$/;
 export function parseAktivitet(aktivitet: Aktivitet): ParsetAktivitet {
   const melding = aktivitet.melding;
 
+  // Sjekk kontekst-basert fase først
+  const faseKontekst = aktivitet.kontekster.find(
+    (k) => k.kontekstType === "Fase",
+  );
+  const fase = faseKontekst?.kontekstMap["fase"] as
+    | AktivitetKategori
+    | undefined;
+
   // Tilstandsendring
   const tilstandMatch = melding.match(TILSTANDSENDRING_REGEX);
   if (tilstandMatch) {
@@ -109,7 +117,7 @@ export function parseAktivitet(aktivitet: Aktivitet): ParsetAktivitet {
     };
   }
 
-  // Ventepunkt
+  // Ventepunkt / informasjonsinnhenting
   const ventepunktMatch = melding.match(VENTEPUNKT_REGEX);
   if (ventepunktMatch) {
     return {
@@ -158,6 +166,11 @@ export function parseAktivitet(aktivitet: Aktivitet): ParsetAktivitet {
       kategori: "regelkjøring",
       metadata: { beskrivelse: melding, type: typeMap[regelMatch[1]] },
     };
+  }
+
+  // Bruk fase fra kontekst som fallback-kategori
+  if (fase) {
+    return { original: aktivitet, kategori: fase, metadata: null };
   }
 
   // Alt annet
