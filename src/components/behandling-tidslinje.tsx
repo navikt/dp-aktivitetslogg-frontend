@@ -204,13 +204,11 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
         <InlineMessage status="warning" size="small">
           <VStack gap="space-2">
             <span>Venter på opplysninger</span>
-            <HStack gap="space-2" wrap>
+            <List size="small" as="ul">
               {meta.opplysninger.map((opplysning, i) => (
-                <Tag key={i} variant="warning" size="xsmall">
-                  {opplysning}
-                </Tag>
+                <List.Item key={i}>{opplysning}</List.Item>
               ))}
-            </HStack>
+            </List>
           </VStack>
         </InlineMessage>
       );
