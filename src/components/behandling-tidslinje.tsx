@@ -55,17 +55,17 @@ function TidslinjeGruppeVisning({ gruppe }: { gruppe: TidslinjeGruppe }) {
           <Heading size="xsmall" as="h3">
             {meta.til}
           </Heading>
-          <Detail>fra {meta.fra}</Detail>
+          <Detail>← {meta.fra}</Detail>
         </div>
       )}
 
-      {regelkjøringer.length > 0 && <RegelGruppe regler={regelkjøringer} />}
+      <div className={styles.gruppeInnhold}>
+        {regelkjøringer.length > 0 && <RegelGruppe regler={regelkjøringer} />}
 
-      <ul className={styles.aktivitetListe}>
         {øvrige.map((aktivitet, index) => (
-          <AktivitetVisning key={index} aktivitet={aktivitet} />
+          <AktivitetKort key={index} aktivitet={aktivitet} />
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
@@ -75,9 +75,14 @@ function RegelGruppe({ regler }: { regler: ParsetAktivitet[] }) {
 
   return (
     <div className={styles.regelGruppe} onClick={() => setÅpen(!åpen)}>
-      <BodyShort size="small">
-        {åpen ? "▾" : "▸"} {regler.length} regler kjørt
-      </BodyShort>
+      <div className={styles.regelGruppeHeader}>
+        <BodyShort size="small" weight="semibold">
+          {åpen ? "▾" : "▸"} {regler.length} regler evaluert
+        </BodyShort>
+        <Tag variant="neutral" size="xsmall">
+          Regelkjøring
+        </Tag>
+      </div>
       {åpen && (
         <ul className={styles.regelListe}>
           {regler.map((regel, index) => (
@@ -91,40 +96,70 @@ function RegelGruppe({ regler }: { regler: ParsetAktivitet[] }) {
   );
 }
 
-function AktivitetVisning({ aktivitet }: { aktivitet: ParsetAktivitet }) {
+function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
   const { kategori, original, metadata } = aktivitet;
 
   switch (kategori) {
     case "oppsummering": {
       const meta = metadata as OppsummeringMeta;
       return (
-        <li className={`${styles.aktivitetItem} ${styles.oppsummering}`}>
-          ✓ {meta.antallKjørt} regler kjørt
-          {meta.antallMangler > 0 && (
-            <Tag variant="warning" size="xsmall" style={{ marginLeft: 8 }}>
-              {meta.antallMangler} mangler
-            </Tag>
-          )}
-        </li>
+        <div className={`${styles.kort} ${styles.oppsummering}`}>
+          <div className={styles.kortHeader}>
+            <BodyShort size="small" weight="semibold">
+              ✓ {meta.antallKjørt} regler kjørt
+            </BodyShort>
+            {meta.antallMangler > 0 && (
+              <Tag variant="warning" size="xsmall">
+                {meta.antallMangler} mangler gjenstår
+              </Tag>
+            )}
+            {meta.antallMangler === 0 && (
+              <Tag variant="success" size="xsmall">
+                Komplett
+              </Tag>
+            )}
+          </div>
+        </div>
       );
     }
     case "ventepunkt": {
       const meta = metadata as VentepunktMeta;
       return (
-        <li className={`${styles.aktivitetItem} ${styles.ventepunkt}`}>
-          ⏳ Venter på: {meta.opplysninger.join(", ")}
-        </li>
+        <div className={`${styles.kort} ${styles.ventepunkt}`}>
+          <BodyShort size="small" weight="semibold">
+            ⏳ Venter på ekstern informasjon
+          </BodyShort>
+          <div className={styles.ventepunktListe}>
+            {meta.opplysninger.map((opplysning, i) => (
+              <Tag key={i} variant="warning" size="xsmall">
+                {opplysning}
+              </Tag>
+            ))}
+          </div>
+        </div>
       );
     }
     case "beslutning": {
       const meta = metadata as BeslutningMeta;
       return (
-        <li className={`${styles.aktivitetItem} ${styles.beslutning}`}>
-          🔀 {meta.resultat}
-        </li>
+        <div className={`${styles.kort} ${styles.beslutning}`}>
+          <div className={styles.kortHeader}>
+            <BodyShort size="small" weight="semibold">
+              🔀 Beslutning
+            </BodyShort>
+            <Tag variant="success" size="xsmall">
+              {meta.grunn}
+            </Tag>
+          </div>
+          <Detail>{meta.resultat}</Detail>
+        </div>
       );
     }
     default:
-      return <li className={styles.aktivitetItem}>{original.melding}</li>;
+      return (
+        <div className={`${styles.kort} ${styles.info}`}>
+          <BodyShort size="small">{original.melding}</BodyShort>
+        </div>
+      );
   }
 }
