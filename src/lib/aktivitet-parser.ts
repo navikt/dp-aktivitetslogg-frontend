@@ -29,7 +29,14 @@ export interface TilstandsendringMeta {
 
 export interface RegelkjøringMeta {
   beskrivelse: string;
-  type: "beregner" | "sjekker" | "fastsetter" | "henter" | "finner" | "venter";
+  type:
+    | "beregner"
+    | "sjekker"
+    | "fastsetter"
+    | "henter"
+    | "finner"
+    | "venter"
+    | "slår_opp";
 }
 
 export interface OppsummeringMeta {
@@ -73,7 +80,7 @@ const BESLUTNING_REGEXES = [
   },
 ];
 const REGELKJØRING_REGEX =
-  /^(Beregner|Sjekker|Fastsetter|Henter|Finner|Venter)\b/;
+  /^(Beregner|Sjekker|Fastsetter|Henter|Finner|Venter|Slår opp)\b/;
 const MOTTOK_SVAR_REGEX = /^Mottok svar på opplysning om (.+)$/;
 
 export function parseAktivitet(aktivitet: Aktivitet): ParsetAktivitet {
@@ -144,6 +151,7 @@ export function parseAktivitet(aktivitet: Aktivitet): ParsetAktivitet {
       Henter: "henter",
       Finner: "finner",
       Venter: "venter",
+      "Slår opp": "slår_opp",
     };
     return {
       original: aktivitet,
