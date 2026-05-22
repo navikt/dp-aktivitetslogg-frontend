@@ -1,3 +1,36 @@
+.behandlinger {
+  display: flex;
+  flex-direction: column;
+  gap: var(--a-spacing-6);
+}
+
+.behandlingKort {
+  transition: box-shadow 0.15s;
+}
+
+.behandlingKort:hover {
+  box-shadow: var(--a-shadow-medium);
+}
+
+.behandlingHeader {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.behandlingTittel {
+  display: flex;
+  align-items: center;
+  gap: var(--a-spacing-4);
+}
+
+.behandlingTags {
+  display: flex;
+  gap: var(--a-spacing-2);
+  flex-wrap: wrap;
+}
+
 .tidslinje {
   position: relative;
   padding-left: var(--a-spacing-10);

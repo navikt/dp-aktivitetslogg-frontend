@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { Aktivitetslogg } from "@/lib/aktivitetslogg-api";
 import {
-  grupperAktiviteter,
+  grupperPerBehandling,
+  BehandlingGruppe,
   ParsetAktivitet,
   TidslinjeGruppe,
   TilstandsendringMeta,
@@ -11,7 +12,7 @@ import {
   VentepunktMeta,
   BeslutningMeta,
 } from "@/lib/aktivitet-parser";
-import { BodyShort, Detail, Heading, Tag } from "@navikt/ds-react";
+import { BodyShort, Detail, Heading, Tag, Box } from "@navikt/ds-react";
 import styles from "./behandling-tidslinje.module.css";
 
 interface Props {
@@ -19,19 +20,68 @@ interface Props {
 }
 
 export default function BehandlingTidslinje({ data }: Props) {
-  const alleAktiviteter = data.flatMap((logg) => logg.aktiviteter);
-  const grupper = grupperAktiviteter(alleAktiviteter);
+  const behandlinger = grupperPerBehandling(data);
 
-  if (grupper.length === 0) {
+  if (behandlinger.length === 0) {
     return <BodyShort>Ingen aktiviteter å vise.</BodyShort>;
   }
 
   return (
-    <div className={styles.tidslinje}>
-      {grupper.map((gruppe, index) => (
-        <TidslinjeGruppeVisning key={index} gruppe={gruppe} />
+    <div className={styles.behandlinger}>
+      {behandlinger.map((behandling) => (
+        <BehandlingKort key={behandling.behandlingId} behandling={behandling} />
       ))}
     </div>
+  );
+}
+
+function BehandlingKort({ behandling }: { behandling: BehandlingGruppe }) {
+  const [åpen, setÅpen] = useState(true);
+  const kortId =
+    behandling.behandlingId === "ukjent"
+      ? "Uten behandling"
+      : behandling.behandlingId.substring(0, 8);
+
+  return (
+    <Box
+      padding="space-16"
+      borderRadius="8"
+      borderWidth="1"
+      borderColor="neutral-subtle"
+      className={styles.behandlingKort}
+    >
+      <div className={styles.behandlingHeader} onClick={() => setÅpen(!åpen)}>
+        <div className={styles.behandlingTittel}>
+          <Heading size="xsmall" as="h2">
+            {åpen ? "▾" : "▸"} Behandling {kortId}
+          </Heading>
+          <div className={styles.behandlingTags}>
+            {behandling.hendelser.slice(0, 3).map((hendelse) => (
+              <Tag key={hendelse} variant="neutral" size="xsmall">
+                {hendelse}
+              </Tag>
+            ))}
+            {behandling.hendelser.length > 3 && (
+              <Tag variant="neutral" size="xsmall">
+                +{behandling.hendelser.length - 3}
+              </Tag>
+            )}
+          </div>
+        </div>
+        <Detail>
+          {behandling.førsteTidsstempel?.substring(0, 16) ?? ""} →{" "}
+          {behandling.sisteTidsstempel?.substring(0, 16) ?? ""}
+        </Detail>
+      </div>
+
+      {åpen && (
+        <div className={styles.tidslinje}>
+          {behandling.tidslinjeGrupper.map((gruppe, index) => (
+            <TidslinjeGruppeVisning key={index} gruppe={gruppe} />
+          ))}
+        </div>
+      )}
+    </Box>
   );
 }
 

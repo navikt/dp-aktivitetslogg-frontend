@@ -1,4 +1,4 @@
-import { Aktivitet } from "@/lib/aktivitetslogg-api";
+import { Aktivitet, Aktivitetslogg } from "@/lib/aktivitetslogg-api";
 
 export type AktivitetKategori =
   | "tilstandsendring"
@@ -190,4 +190,66 @@ function finnBehandlingId(aktivitet: Aktivitet): string | null {
     }
   }
   return null;
+}
+
+export interface BehandlingGruppe {
+  behandlingId: string;
+  hendelser: string[];
+  førsteTidsstempel: string | null;
+  sisteTidsstempel: string | null;
+  tidslinjeGrupper: TidslinjeGruppe[];
+}
+
+/**
+ * Grupperer aktivitetslogger per behandlingId.
+ * Aktiviteter uten behandlingId havner i en "Ukjent"-gruppe.
+ */
+export function grupperPerBehandling(
+  aktivitetslogger: Aktivitetslogg[],
+): BehandlingGruppe[] {
+  const behandlingMap = new Map<
+    string,
+    { aktiviteter: Aktivitet[]; hendelser: Set<string> }
+  >();
+
+  for (const logg of aktivitetslogger) {
+    for (const aktivitet of logg.aktiviteter) {
+      const behandlingId = finnBehandlingId(aktivitet) ?? "ukjent";
+
+      if (!behandlingMap.has(behandlingId)) {
+        behandlingMap.set(behandlingId, {
+          aktiviteter: [],
+          hendelser: new Set(),
+        });
+      }
+
+      const entry = behandlingMap.get(behandlingId)!;
+      entry.aktiviteter.push(aktivitet);
+      entry.hendelser.add(logg.hendelse.type);
+    }
+  }
+
+  const grupper: BehandlingGruppe[] = [];
+
+  for (const [behandlingId, { aktiviteter, hendelser }] of behandlingMap) {
+    // Sorter aktiviteter kronologisk
+    const sortert = [...aktiviteter].sort((a, b) =>
+      a.tidsstempel.localeCompare(b.tidsstempel),
+    );
+
+    grupper.push({
+      behandlingId,
+      hendelser: [...hendelser],
+      førsteTidsstempel: sortert[0]?.tidsstempel ?? null,
+      sisteTidsstempel: sortert[sortert.length - 1]?.tidsstempel ?? null,
+      tidslinjeGrupper: grupperAktiviteter(sortert),
+    });
+  }
+
+  // Sorter behandlinger med nyeste først
+  grupper.sort((a, b) =>
+    (b.sisteTidsstempel ?? "").localeCompare(a.sisteTidsstempel ?? ""),
+  );
+
+  return grupper;
 }
