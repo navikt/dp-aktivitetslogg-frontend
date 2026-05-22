@@ -26,6 +26,32 @@ import {
 } from "@navikt/ds-react";
 import styles from "./behandling-tidslinje.module.css";
 
+function formaterTidspunkt(iso?: string): string | undefined {
+  if (!iso) return undefined;
+  return new Date(iso).toLocaleString("nb-NO", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+function formaterKortTidspunkt(iso?: string): string | undefined {
+  if (!iso) return undefined;
+  return new Date(iso).toLocaleString("nb-NO", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formaterHendelsesnavn(hendelse: string): string {
+  return hendelse.replace(/_/g, " ").replace(/\b\w/, (c) => c.toUpperCase());
+}
+
 interface Props {
   data: Aktivitetslogg[];
 }
@@ -50,11 +76,11 @@ function BehandlingKort({ behandling }: { behandling: BehandlingGruppe }) {
   const kortId =
     behandling.behandlingId === "ukjent"
       ? "Uten behandling"
-      : behandling.behandlingId.substring(0, 8);
+      : behandling.behandlingId;
 
   const tidsrom = [
-    behandling.førsteTidsstempel?.substring(0, 16),
-    behandling.sisteTidsstempel?.substring(0, 16),
+    formaterKortTidspunkt(behandling.førsteTidsstempel ?? undefined),
+    formaterKortTidspunkt(behandling.sisteTidsstempel ?? undefined),
   ]
     .filter(Boolean)
     .join(" → ");
@@ -69,7 +95,7 @@ function BehandlingKort({ behandling }: { behandling: BehandlingGruppe }) {
           <HStack gap="space-2" wrap align="center">
             {behandling.hendelser.slice(0, 4).map((hendelse) => (
               <Tag key={hendelse} variant="neutral" size="xsmall">
-                {hendelse}
+                {formaterHendelsesnavn(hendelse)}
               </Tag>
             ))}
             {tidsrom && (
@@ -115,10 +141,9 @@ function TidslinjeGruppeVisning({
   );
 
   const title = meta ? meta.til : (gruppe.tilstand ?? "Oppstart");
-  const timestamp =
-    (
-      tilstandsendring ?? gruppe.aktiviteter[0]
-    )?.original.tidsstempel?.substring(0, 16) ?? undefined;
+  const timestamp = formaterTidspunkt(
+    (tilstandsendring ?? gruppe.aktiviteter[0])?.original.tidsstempel,
+  );
   const status = isLast ? "active" : "completed";
 
   const hasContent = regelkjøringer.length > 0 || øvrige.length > 0;
@@ -177,7 +202,7 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
       return (
         <InlineMessage status="warning" size="small">
           <VStack gap="space-2">
-            <span>Venter på ekstern informasjon</span>
+            <span>Venter på opplysninger</span>
             <HStack gap="space-2" wrap>
               {meta.opplysninger.map((opplysning, i) => (
                 <Tag key={i} variant="warning" size="xsmall">
@@ -195,8 +220,8 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
         <InlineMessage status="success" size="small">
           <HStack gap="space-2" align="center">
             <span>{meta.resultat}</span>
-            <Tag variant="success" size="xsmall">
-              {meta.grunn}
+            <Tag variant="info" size="xsmall">
+              Årsak: {meta.grunn}
             </Tag>
           </HStack>
         </InlineMessage>
