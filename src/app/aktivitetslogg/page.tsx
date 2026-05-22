@@ -1,10 +1,11 @@
 "use client";
 import type { NextPage } from "next";
 import styles from "@/app/page.module.css";
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import Header from "@/components/header";
 import AktivitetsloggContainer from "@/components/aktivitetslogg";
 import { ApplicationContextProvider } from "@/app/aktivitetslogg/application-context";
+import { Loader } from "@navikt/ds-react";
 
 const AktivitetsloggPage: NextPage = ({}) => {
   const [identToSearch, setIdentToSearch] = useState<string | undefined>(
@@ -15,7 +16,9 @@ const AktivitetsloggPage: NextPage = ({}) => {
       <ApplicationContextProvider>
         <Header />
         <div className={styles.main}>
-          <AktivitetsloggContainer />
+          <Suspense fallback={<Loader size="xlarge" title="Laster…" />}>
+            <AktivitetsloggContainer />
+          </Suspense>
         </div>
       </ApplicationContextProvider>
     </main>

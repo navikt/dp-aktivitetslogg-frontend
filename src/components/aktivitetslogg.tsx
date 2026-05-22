@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useContext, useEffect, useState, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import BehandlingTidslinje from "./behandling-tidslinje";
 import {
   Aktivitetslogg,
@@ -19,14 +20,17 @@ const UUID_REGEX =
 export default function AktivitetsloggContainer() {
   const { encryptIdent, identToSearchFor } =
     useContext<IApplicationContext>(ApplicationContext);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   const ident = encryptIdent(identToSearchFor);
+  const initialSøk = searchParams.get("behandlingId") ?? "";
 
   const [aktivitetslogger, setAktivitetslogger] = useState<Aktivitetslogg[]>(
     [],
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [søk, setSøk] = useState("");
+  const [søk, setSøk] = useState(initialSøk);
   const [søkeResultat, setSøkeResultat] = useState<Aktivitetslogg[] | null>(
     null,
   );
@@ -70,21 +74,44 @@ export default function AktivitetsloggContainer() {
     }
   }, []);
 
+  // Søk automatisk hvis behandlingId finnes i URL ved oppstart
+  useEffect(() => {
+    if (initialSøk && UUID_REGEX.test(initialSøk)) {
+      søkBehandling(initialSøk);
+    }
+  }, [initialSøk, søkBehandling]);
+
+  const oppdaterUrl = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value && UUID_REGEX.test(value)) {
+        params.set("behandlingId", value);
+      } else {
+        params.delete("behandlingId");
+      }
+      const query = params.toString();
+      router.replace(query ? `?${query}` : "?", { scroll: false });
+    },
+    [searchParams, router],
+  );
+
   const handleSøk = useCallback(
     (value: string) => {
       setSøk(value);
       const trimmed = value.trim();
       if (!trimmed) {
         setSøkeResultat(null);
+        oppdaterUrl("");
         return;
       }
       if (UUID_REGEX.test(trimmed)) {
+        oppdaterUrl(trimmed);
         søkBehandling(trimmed);
       } else {
         setSøkeResultat(null);
       }
     },
-    [søkBehandling],
+    [søkBehandling, oppdaterUrl],
   );
 
   const visData = søkeResultat ?? aktivitetslogger;
@@ -105,6 +132,7 @@ export default function AktivitetsloggContainer() {
         onClear={() => {
           setSøk("");
           setSøkeResultat(null);
+          oppdaterUrl("");
         }}
       />
       {søker ? (
