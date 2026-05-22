@@ -8,6 +8,7 @@ import {
   ParsetAktivitet,
   TidslinjeGruppe,
   TilstandsendringMeta,
+  MottokSvarMeta,
   OppsummeringMeta,
   VentepunktMeta,
   BeslutningMeta,
@@ -147,17 +148,32 @@ function TidslinjeGruppeVisning({
   const regelkjøringer = gruppe.aktiviteter.filter(
     (a) => a.kategori === "regelkjøring",
   );
+  const mottokSvar = gruppe.aktiviteter.filter(
+    (a) => a.kategori === "mottok_svar",
+  );
   const øvrige = gruppe.aktiviteter.filter(
-    (a) => a.kategori !== "tilstandsendring" && a.kategori !== "regelkjøring",
+    (a) =>
+      a.kategori !== "tilstandsendring" &&
+      a.kategori !== "regelkjøring" &&
+      a.kategori !== "mottok_svar",
   );
 
-  const title = meta ? meta.til : (gruppe.tilstand ?? "Oppstart");
+  // Hvis gruppen kun består av mottok_svar, vis "Mottok svar" som tittel
+  const isMottokSvarGruppe =
+    mottokSvar.length > 0 && !tilstandsendring && regelkjøringer.length === 0;
+
+  const title = isMottokSvarGruppe
+    ? "Mottok svar"
+    : meta
+      ? meta.til
+      : (gruppe.tilstand ?? "Oppstart");
   const timestamp = formaterTidspunkt(
     (tilstandsendring ?? gruppe.aktiviteter[0])?.original.tidsstempel,
   );
   const status = isLast ? "active" : "completed";
 
-  const hasContent = regelkjøringer.length > 0 || øvrige.length > 0;
+  const hasContent =
+    regelkjøringer.length > 0 || mottokSvar.length > 0 || øvrige.length > 0;
 
   return (
     <Process.Event
@@ -169,6 +185,9 @@ function TidslinjeGruppeVisning({
       {hasContent && (
         <VStack gap="space-4">
           {regelkjøringer.length > 0 && <RegelGruppe regler={regelkjøringer} />}
+          {mottokSvar.length > 0 && (
+            <MottokSvarGruppe opplysninger={mottokSvar} />
+          )}
           {øvrige.map((aktivitet, index) => (
             <AktivitetKort key={index} aktivitet={aktivitet} />
           ))}
@@ -184,6 +203,27 @@ function RegelGruppe({ regler }: { regler: ParsetAktivitet[] }) {
       <List size="small">
         {regler.map((regel, index) => (
           <List.Item key={index}>{regel.original.melding}</List.Item>
+        ))}
+      </List>
+    </ReadMore>
+  );
+}
+
+function MottokSvarGruppe({
+  opplysninger,
+}: {
+  opplysninger: ParsetAktivitet[];
+}) {
+  return (
+    <ReadMore
+      header={`Mottok svar på ${opplysninger.length} opplysninger`}
+      size="small"
+    >
+      <List size="small">
+        {opplysninger.map((item, index) => (
+          <List.Item key={index}>
+            {(item.metadata as MottokSvarMeta).opplysning}
+          </List.Item>
         ))}
       </List>
     </ReadMore>

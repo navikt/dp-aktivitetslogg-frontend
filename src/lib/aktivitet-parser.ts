@@ -5,6 +5,7 @@ export type AktivitetKategori =
   | "regelkjøring"
   | "oppsummering"
   | "ventepunkt"
+  | "mottok_svar"
   | "beslutning"
   | "info";
 
@@ -16,6 +17,7 @@ export interface ParsetAktivitet {
     | RegelkjøringMeta
     | OppsummeringMeta
     | VentepunktMeta
+    | MottokSvarMeta
     | BeslutningMeta
     | null;
 }
@@ -44,6 +46,10 @@ export interface BeslutningMeta {
   resultat: string;
 }
 
+export interface MottokSvarMeta {
+  opplysning: string;
+}
+
 const TILSTANDSENDRING_REGEX = /^Tilstandsendring: (.+) → (.+)$/;
 const OPPSUMMERING_REGEX =
   /^Regelkjøring: (\d+) regler kjørt, (\d+) mangler gjenstår$/;
@@ -68,6 +74,7 @@ const BESLUTNING_REGEXES = [
 ];
 const REGELKJØRING_REGEX =
   /^(Beregner|Sjekker|Fastsetter|Henter|Finner|Venter)\b/;
+const MOTTOK_SVAR_REGEX = /^Mottok svar på opplysning om (.+)$/;
 
 export function parseAktivitet(aktivitet: Aktivitet): ParsetAktivitet {
   const melding = aktivitet.melding;
@@ -117,6 +124,16 @@ export function parseAktivitet(aktivitet: Aktivitet): ParsetAktivitet {
     }
   }
 
+  // Mottok svar
+  const mottokSvarMatch = melding.match(MOTTOK_SVAR_REGEX);
+  if (mottokSvarMatch) {
+    return {
+      original: aktivitet,
+      kategori: "mottok_svar",
+      metadata: { opplysning: mottokSvarMatch[1] },
+    };
+  }
+
   // Regelkjøring
   const regelMatch = melding.match(REGELKJØRING_REGEX);
   if (regelMatch) {
@@ -152,6 +169,7 @@ export function grupperAktiviteter(
   const grupper: TidslinjeGruppe[] = [];
   let gjeldendeTilstand: string | null = null;
   let gjeldendeGruppe: TidslinjeGruppe | null = null;
+  let venterPåSvar = false;
 
   for (const aktivitet of parsede) {
     const behandlingId = finnBehandlingId(aktivitet.original);
@@ -159,24 +177,56 @@ export function grupperAktiviteter(
     if (aktivitet.kategori === "tilstandsendring") {
       const meta = aktivitet.metadata as TilstandsendringMeta;
       gjeldendeTilstand = meta.til;
+      venterPåSvar = false;
 
-      // Start ny gruppe for ny tilstand
       gjeldendeGruppe = {
         behandlingId,
         tilstand: gjeldendeTilstand,
         aktiviteter: [aktivitet],
       };
       grupper.push(gjeldendeGruppe);
-    } else {
-      if (!gjeldendeGruppe) {
+    } else if (aktivitet.kategori === "ventepunkt") {
+      // Ventepunkt markerer en pause
+      if (gjeldendeGruppe) {
+        gjeldendeGruppe.aktiviteter.push(aktivitet);
+      }
+      venterPåSvar = true;
+    } else if (venterPåSvar && aktivitet.kategori === "mottok_svar") {
+      // Første mottok_svar etter ventepunkt — start ny gruppe
+      if (
+        venterPåSvar &&
+        !gjeldendeGruppe?.aktiviteter.some((a) => a.kategori === "mottok_svar")
+      ) {
         gjeldendeGruppe = {
           behandlingId,
           tilstand: gjeldendeTilstand,
-          aktiviteter: [],
+          aktiviteter: [aktivitet],
         };
         grupper.push(gjeldendeGruppe);
+      } else {
+        gjeldendeGruppe!.aktiviteter.push(aktivitet);
       }
-      gjeldendeGruppe.aktiviteter.push(aktivitet);
+    } else {
+      // Regelkjøring etter mottok_svar = ny runde
+      if (venterPåSvar && aktivitet.kategori === "regelkjøring") {
+        venterPåSvar = false;
+        gjeldendeGruppe = {
+          behandlingId,
+          tilstand: gjeldendeTilstand,
+          aktiviteter: [aktivitet],
+        };
+        grupper.push(gjeldendeGruppe);
+      } else {
+        if (!gjeldendeGruppe) {
+          gjeldendeGruppe = {
+            behandlingId,
+            tilstand: gjeldendeTilstand,
+            aktiviteter: [],
+          };
+          grupper.push(gjeldendeGruppe);
+        }
+        gjeldendeGruppe.aktiviteter.push(aktivitet);
+      }
     }
   }
 
