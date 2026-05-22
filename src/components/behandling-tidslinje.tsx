@@ -14,6 +14,7 @@ import {
 } from "@/lib/aktivitet-parser";
 import {
   BodyShort,
+  CopyButton,
   Detail,
   ExpansionCard,
   HStack,
@@ -90,7 +91,16 @@ function BehandlingKort({ behandling }: { behandling: BehandlingGruppe }) {
     <ExpansionCard aria-label={`Behandling ${kortId}`} defaultOpen size="small">
       <ExpansionCard.Header>
         <ExpansionCard.Title size="small">
-          Behandling {kortId}
+          <HStack gap="space-2" align="center">
+            Behandling {kortId}
+            {behandling.behandlingId !== "ukjent" && (
+              <CopyButton
+                copyText={behandling.behandlingId}
+                size="xsmall"
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
+          </HStack>
         </ExpansionCard.Title>
         <ExpansionCard.Description>
           <HStack gap="space-2" wrap align="center">
