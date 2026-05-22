@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Aktivitetslogg } from "@/lib/aktivitetslogg-api";
 import {
   grupperPerBehandling,
@@ -12,7 +12,18 @@ import {
   VentepunktMeta,
   BeslutningMeta,
 } from "@/lib/aktivitet-parser";
-import { BodyShort, Detail, Heading, Tag, Box } from "@navikt/ds-react";
+import {
+  BodyShort,
+  Detail,
+  ExpansionCard,
+  HStack,
+  VStack,
+  Tag,
+  ReadMore,
+  Box,
+  List,
+  InlineMessage,
+} from "@navikt/ds-react";
 import styles from "./behandling-tidslinje.module.css";
 
 interface Props {
@@ -27,61 +38,56 @@ export default function BehandlingTidslinje({ data }: Props) {
   }
 
   return (
-    <div className={styles.behandlinger}>
+    <VStack gap="space-6">
       {behandlinger.map((behandling) => (
         <BehandlingKort key={behandling.behandlingId} behandling={behandling} />
       ))}
-    </div>
+    </VStack>
   );
 }
 
 function BehandlingKort({ behandling }: { behandling: BehandlingGruppe }) {
-  const [åpen, setÅpen] = useState(true);
   const kortId =
     behandling.behandlingId === "ukjent"
       ? "Uten behandling"
       : behandling.behandlingId.substring(0, 8);
 
+  const tidsrom = [
+    behandling.førsteTidsstempel?.substring(0, 16),
+    behandling.sisteTidsstempel?.substring(0, 16),
+  ]
+    .filter(Boolean)
+    .join(" → ");
+
   return (
-    <Box
-      padding="space-16"
-      borderRadius="8"
-      borderWidth="1"
-      borderColor="neutral-subtle"
-      className={styles.behandlingKort}
-    >
-      <div className={styles.behandlingHeader} onClick={() => setÅpen(!åpen)}>
-        <div className={styles.behandlingTittel}>
-          <Heading size="xsmall" as="h2">
-            {åpen ? "▾" : "▸"} Behandling {kortId}
-          </Heading>
-          <div className={styles.behandlingTags}>
-            {behandling.hendelser.slice(0, 3).map((hendelse) => (
+    <ExpansionCard aria-label={`Behandling ${kortId}`} defaultOpen size="small">
+      <ExpansionCard.Header>
+        <ExpansionCard.Title size="small">
+          Behandling {kortId}
+        </ExpansionCard.Title>
+        <ExpansionCard.Description>
+          <HStack gap="space-2" wrap align="center">
+            {behandling.hendelser.slice(0, 4).map((hendelse) => (
               <Tag key={hendelse} variant="neutral" size="xsmall">
                 {hendelse}
               </Tag>
             ))}
-            {behandling.hendelser.length > 3 && (
-              <Tag variant="neutral" size="xsmall">
-                +{behandling.hendelser.length - 3}
-              </Tag>
+            {tidsrom && (
+              <Detail as="span" className={styles.tidsrom}>
+                {tidsrom}
+              </Detail>
             )}
-          </div>
-        </div>
-        <Detail>
-          {behandling.førsteTidsstempel?.substring(0, 16) ?? ""} →{" "}
-          {behandling.sisteTidsstempel?.substring(0, 16) ?? ""}
-        </Detail>
-      </div>
-
-      {åpen && (
+          </HStack>
+        </ExpansionCard.Description>
+      </ExpansionCard.Header>
+      <ExpansionCard.Content>
         <div className={styles.tidslinje}>
           {behandling.tidslinjeGrupper.map((gruppe, index) => (
             <TidslinjeGruppeVisning key={index} gruppe={gruppe} />
           ))}
         </div>
-      )}
-    </Box>
+      </ExpansionCard.Content>
+    </ExpansionCard>
   );
 }
 
@@ -102,47 +108,32 @@ function TidslinjeGruppeVisning({ gruppe }: { gruppe: TidslinjeGruppe }) {
     <div className={styles.gruppe}>
       {meta && (
         <div className={styles.milepæl}>
-          <Heading size="xsmall" as="h3">
+          <BodyShort size="small" weight="semibold">
             {meta.til}
-          </Heading>
+          </BodyShort>
           <Detail>← {meta.fra}</Detail>
         </div>
       )}
 
-      <div className={styles.gruppeInnhold}>
+      <VStack gap="space-2" className={styles.gruppeInnhold}>
         {regelkjøringer.length > 0 && <RegelGruppe regler={regelkjøringer} />}
-
         {øvrige.map((aktivitet, index) => (
           <AktivitetKort key={index} aktivitet={aktivitet} />
         ))}
-      </div>
+      </VStack>
     </div>
   );
 }
 
 function RegelGruppe({ regler }: { regler: ParsetAktivitet[] }) {
-  const [åpen, setÅpen] = useState(false);
-
   return (
-    <div className={styles.regelGruppe} onClick={() => setÅpen(!åpen)}>
-      <div className={styles.regelGruppeHeader}>
-        <BodyShort size="small" weight="semibold">
-          {åpen ? "▾" : "▸"} {regler.length} regler evaluert
-        </BodyShort>
-        <Tag variant="neutral" size="xsmall">
-          Regelkjøring
-        </Tag>
-      </div>
-      {åpen && (
-        <ul className={styles.regelListe}>
-          {regler.map((regel, index) => (
-            <li key={index} className={styles.regelItem}>
-              {regel.original.melding}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <ReadMore header={`${regler.length} regler evaluert`} size="small">
+      <List size="small">
+        {regler.map((regel, index) => (
+          <List.Item key={index}>{regel.original.melding}</List.Item>
+        ))}
+      </List>
+    </ReadMore>
   );
 }
 
@@ -153,63 +144,52 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
     case "oppsummering": {
       const meta = metadata as OppsummeringMeta;
       return (
-        <div className={`${styles.kort} ${styles.oppsummering}`}>
-          <div className={styles.kortHeader}>
-            <BodyShort size="small" weight="semibold">
-              ✓ {meta.antallKjørt} regler kjørt
-            </BodyShort>
-            {meta.antallMangler > 0 && (
-              <Tag variant="warning" size="xsmall">
-                {meta.antallMangler} mangler gjenstår
-              </Tag>
-            )}
-            {meta.antallMangler === 0 && (
-              <Tag variant="success" size="xsmall">
-                Komplett
-              </Tag>
-            )}
-          </div>
-        </div>
+        <InlineMessage
+          status={meta.antallMangler > 0 ? "warning" : "success"}
+          size="small"
+        >
+          {meta.antallKjørt} regler kjørt
+          {meta.antallMangler > 0
+            ? ` — ${meta.antallMangler} mangler gjenstår`
+            : " — komplett"}
+        </InlineMessage>
       );
     }
     case "ventepunkt": {
       const meta = metadata as VentepunktMeta;
       return (
-        <div className={`${styles.kort} ${styles.ventepunkt}`}>
-          <BodyShort size="small" weight="semibold">
-            ⏳ Venter på ekstern informasjon
-          </BodyShort>
-          <div className={styles.ventepunktListe}>
-            {meta.opplysninger.map((opplysning, i) => (
-              <Tag key={i} variant="warning" size="xsmall">
-                {opplysning}
-              </Tag>
-            ))}
-          </div>
-        </div>
+        <InlineMessage status="warning" size="small">
+          <VStack gap="space-2">
+            <span>Venter på ekstern informasjon</span>
+            <HStack gap="space-2" wrap>
+              {meta.opplysninger.map((opplysning, i) => (
+                <Tag key={i} variant="warning" size="xsmall">
+                  {opplysning}
+                </Tag>
+              ))}
+            </HStack>
+          </VStack>
+        </InlineMessage>
       );
     }
     case "beslutning": {
       const meta = metadata as BeslutningMeta;
       return (
-        <div className={`${styles.kort} ${styles.beslutning}`}>
-          <div className={styles.kortHeader}>
-            <BodyShort size="small" weight="semibold">
-              🔀 Beslutning
-            </BodyShort>
+        <InlineMessage status="success" size="small">
+          <HStack gap="space-2" align="center">
+            <span>{meta.resultat}</span>
             <Tag variant="success" size="xsmall">
               {meta.grunn}
             </Tag>
-          </div>
-          <Detail>{meta.resultat}</Detail>
-        </div>
+          </HStack>
+        </InlineMessage>
       );
     }
     default:
       return (
-        <div className={`${styles.kort} ${styles.info}`}>
-          <BodyShort size="small">{original.melding}</BodyShort>
-        </div>
+        <Box paddingInline="space-6">
+          <Detail textColor="subtle">{original.melding}</Detail>
+        </Box>
       );
   }
 }
