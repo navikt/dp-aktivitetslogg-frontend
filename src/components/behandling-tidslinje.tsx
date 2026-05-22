@@ -248,7 +248,7 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
         </InlineMessage>
       );
     }
-    case "ventepunkt": {
+    case "informasjonsinnhenting": {
       const meta = metadata as VentepunktMeta;
       return (
         <InlineMessage status="warning" size="small">

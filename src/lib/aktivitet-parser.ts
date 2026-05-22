@@ -4,7 +4,7 @@ export type AktivitetKategori =
   | "tilstandsendring"
   | "regelkjøring"
   | "oppsummering"
-  | "ventepunkt"
+  | "informasjonsinnhenting"
   | "mottok_svar"
   | "beslutning"
   | "info";
@@ -114,7 +114,7 @@ export function parseAktivitet(aktivitet: Aktivitet): ParsetAktivitet {
   if (ventepunktMatch) {
     return {
       original: aktivitet,
-      kategori: "ventepunkt",
+      kategori: "informasjonsinnhenting",
       metadata: { opplysninger: ventepunktMatch[1].split(", ") },
     };
   }
@@ -193,7 +193,7 @@ export function grupperAktiviteter(
         aktiviteter: [aktivitet],
       };
       grupper.push(gjeldendeGruppe);
-    } else if (aktivitet.kategori === "ventepunkt") {
+    } else if (aktivitet.kategori === "informasjonsinnhenting") {
       // Ventepunkt markerer en pause
       if (gjeldendeGruppe) {
         gjeldendeGruppe.aktiviteter.push(aktivitet);
