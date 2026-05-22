@@ -1,20 +1,13 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
-import {
-  HStack,
-  InternalHeader,
-  Label,
-  Search,
-  Spacer,
-} from "@navikt/ds-react";
+import React, { useContext, useState } from "react";
+import { HStack, InternalHeader, Search, Spacer } from "@navikt/ds-react";
 import styles from "@/components/header.module.css";
 import { ApplicationContext } from "@/app/aktivitetslogg/application-context";
 
 function Header() {
   const [ident, setIdent] = useState<string | undefined>(undefined);
-  const { setIdentToSearchFor, fulltNavn, totaltAntallAktiviteter } =
-    useContext(ApplicationContext);
+  const { setIdentToSearchFor, fulltNavn } = useContext(ApplicationContext);
 
   const onClear = () => {
     setIdentToSearchFor(undefined);
@@ -22,11 +15,7 @@ function Header() {
   return (
     <InternalHeader>
       <InternalHeader.Title as="h1">Aktivitetslogg</InternalHeader.Title>
-      <HStack
-        align={"center"}
-        justify={"space-between"}
-        style={{ width: "100%", marginRight: "16px" }}
-      >
+      <HStack align={"center"} style={{ width: "100%", marginRight: "16px" }}>
         <form
           className={styles.searchBox}
           onSubmit={(e) => {
@@ -45,9 +34,6 @@ function Header() {
             onClear={onClear}
           />
         </form>
-        <Label size={"small"}>
-          Totalt antall aktiviteter: {totaltAntallAktiviteter}
-        </Label>
       </HStack>
       <Spacer />
       <InternalHeader.User name={fulltNavn} />
