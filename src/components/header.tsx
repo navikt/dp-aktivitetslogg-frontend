@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useContext, useEffect, useState } from "react";
-import "@navikt/ds-css/dist/index.css";
 import {
   HStack,
   InternalHeader,

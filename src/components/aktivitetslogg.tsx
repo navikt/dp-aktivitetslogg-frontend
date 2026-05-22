@@ -8,6 +8,7 @@ import React, {
   useMemo,
 } from "react";
 import AktivitetsloggTabell from "./aktivitetslogg-tabell";
+import BehandlingTidslinje from "./behandling-tidslinje";
 import {
   Aktivitetslogg,
   GetAktivitetsloggRequest,
@@ -19,9 +20,9 @@ import {
   HStack,
   Label,
   Select,
+  ToggleGroup,
   VStack,
 } from "@navikt/ds-react";
-import _ from "lodash";
 import {
   ApplicationContext,
   IApplicationContext,
@@ -41,6 +42,7 @@ export default function AktivitetsloggContainer() {
   const [filterHendelse, setHendelseFilter] = useState("");
   const [filterTjeneste, setTjenesteFilter] = useState("");
   const [waitForLogs, setWaitForLogs] = useState<boolean>(false);
+  const [visning, setVisning] = useState<"tabell" | "tidslinje">("tidslinje");
 
   const lastSeen = useMemo(() => {
     if (waitForLogs && aktivitetslogger.length > 0) {
@@ -72,16 +74,18 @@ export default function AktivitetsloggContainer() {
     setTjenesteFilter(event.target.value);
   };
 
-  const hendelser = _.uniq(
-    filtrerteAktiviteter.map((item) => item.hendelse.type),
-  );
-  const tjenester = _.uniq(
-    filtrerteAktiviteter
-      .flatMap((aktivitet) =>
-        aktivitet.systemParticipatingServices.map((value) => value.service),
-      )
-      .filter((value) => value !== "dp-aktivitetslogg"),
-  );
+  const hendelser = [
+    ...new Set(filtrerteAktiviteter.map((item) => item.hendelse.type)),
+  ];
+  const tjenester = [
+    ...new Set(
+      filtrerteAktiviteter
+        .flatMap((aktivitet) =>
+          aktivitet.systemParticipatingServices.map((value) => value.service),
+        )
+        .filter((value) => value !== "dp-aktivitetslogg"),
+    ),
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,9 +102,15 @@ export default function AktivitetsloggContainer() {
       try {
         const res = await client.getAktivitetslogg(params);
         if (waitForLogs) {
-          setAktivitetslogger((prevState) =>
-            _.uniqBy([...res, ...prevState], (value) => value.id),
-          );
+          setAktivitetslogger((prevState) => {
+            const combined = [...res, ...prevState];
+            const seen = new Set<string>();
+            return combined.filter((item) => {
+              if (seen.has(item.id)) return false;
+              seen.add(item.id);
+              return true;
+            });
+          });
         } else {
           setAktivitetslogger(res);
         }
@@ -115,8 +125,8 @@ export default function AktivitetsloggContainer() {
   return (
     <>
       <form className={styles.form}>
-        <VStack gap={"4"}>
-          <HStack gap={"4"} align={"end"} justify={"end"}>
+        <VStack gap="space-16">
+          <HStack gap="space-16" align={"end"} justify={"end"}>
             <Select
               label={"Hendelsetype"}
               defaultValue={filterHendelse}
@@ -151,7 +161,7 @@ export default function AktivitetsloggContainer() {
               Følg logg
             </Checkbox>
           </HStack>
-          <HStack gap={"4"} align={"end"} justify={"end"}>
+          <HStack gap="space-16" align={"end"} justify={"end"}>
             <Button
               size="small"
               variant="secondary-neutral"
@@ -168,14 +178,31 @@ export default function AktivitetsloggContainer() {
       <VStack
         justify={"end"}
         align={"end"}
-        gap={"4"}
+        gap="space-16"
         style={{ width: "100%", marginRight: "16px" }}
       >
         <Label size={"small"}>
           Antall aktiviteter i søk: {filtrerteAktiviteter.length}
         </Label>
       </VStack>
-      <AktivitetsloggTabell isLoading={isLoading} data={filtrerteAktiviteter} />
+      <HStack gap="space-16" align="center" style={{ margin: "16px 0" }}>
+        <ToggleGroup
+          value={visning}
+          onChange={(value) => setVisning(value as "tabell" | "tidslinje")}
+          size="small"
+        >
+          <ToggleGroup.Item value="tidslinje">Tidslinje</ToggleGroup.Item>
+          <ToggleGroup.Item value="tabell">Tabell</ToggleGroup.Item>
+        </ToggleGroup>
+      </HStack>
+      {visning === "tabell" ? (
+        <AktivitetsloggTabell
+          isLoading={isLoading}
+          data={filtrerteAktiviteter}
+        />
+      ) : (
+        <BehandlingTidslinje data={filtrerteAktiviteter} />
+      )}
     </>
   );
 }
