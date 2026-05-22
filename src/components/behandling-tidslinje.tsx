@@ -219,7 +219,7 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
       const meta = metadata as BeslutningMeta;
       return (
         <InlineMessage status="success" size="small">
-          <VStack gap="space-2">
+          <VStack gap="space-2" align="start">
             <span>{meta.resultat}</span>
             <Tag variant="info" size="xsmall">
               Årsak: {meta.grunn}
