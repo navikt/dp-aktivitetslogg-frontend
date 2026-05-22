@@ -1,33 +1,20 @@
 "use client";
 
-import React, {
-  ChangeEvent,
-  useContext,
-  useEffect,
-  useState,
-  useMemo,
-} from "react";
-import AktivitetsloggTabell from "./aktivitetslogg-tabell";
+import React, { useContext, useEffect, useState, useMemo } from "react";
 import BehandlingTidslinje from "./behandling-tidslinje";
 import {
   Aktivitetslogg,
   GetAktivitetsloggRequest,
 } from "@/lib/aktivitetslogg-api";
-import styles from "@/components/aktivitetslogg-tabell.module.css";
-import {
-  Button,
-  Checkbox,
-  HStack,
-  Label,
-  Select,
-  ToggleGroup,
-  VStack,
-} from "@navikt/ds-react";
+import { BodyShort, Loader, Search, VStack } from "@navikt/ds-react";
 import {
   ApplicationContext,
   IApplicationContext,
 } from "@/app/aktivitetslogg/application-context";
 import { client } from "@/lib/client";
+
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function AktivitetsloggContainer() {
   const { encryptIdent, identToSearchFor } =
@@ -39,171 +26,71 @@ export default function AktivitetsloggContainer() {
     [],
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [filterHendelse, setHendelseFilter] = useState("");
-  const [filterTjeneste, setTjenesteFilter] = useState("");
-  const [waitForLogs, setWaitForLogs] = useState<boolean>(false);
-  const [visning, setVisning] = useState<"tabell" | "tidslinje">("tidslinje");
-
-  const lastSeen = useMemo(() => {
-    if (waitForLogs && aktivitetslogger.length > 0) {
-      return aktivitetslogger[0].id!;
-    }
-    return undefined;
-  }, [waitForLogs, aktivitetslogger]);
-
-  const filtrerteAktiviteter = useMemo(() => {
-    return aktivitetslogger
-      .filter((value) => {
-        if (filterHendelse === "") return true;
-        return value.hendelse.type === filterHendelse;
-      })
-      .filter((value) => {
-        if (filterTjeneste === "") return true;
-        const participatingServices = value.systemParticipatingServices.filter(
-          (value1) => value1.service === filterTjeneste,
-        );
-        return participatingServices.length > 0;
-      });
-  }, [aktivitetslogger, filterHendelse, filterTjeneste]);
-
-  const onHendelseChanged = (event: ChangeEvent<HTMLSelectElement>): void => {
-    setHendelseFilter(event.target.value);
-  };
-
-  const onTjenesteChanged = (event: ChangeEvent<HTMLSelectElement>): void => {
-    setTjenesteFilter(event.target.value);
-  };
-
-  const hendelser = [
-    ...new Set(filtrerteAktiviteter.map((item) => item.hendelse.type)),
-  ];
-  const tjenester = [
-    ...new Set(
-      filtrerteAktiviteter
-        .flatMap((aktivitet) =>
-          aktivitet.systemParticipatingServices.map((value) => value.service),
-        )
-        .filter((value) => value !== "dp-aktivitetslogg"),
-    ),
-  ];
+  const [søk, setSøk] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!waitForLogs) {
-        setIsLoading(true);
-      }
-
-      const params: GetAktivitetsloggRequest = {
-        ident: ident,
-        since: lastSeen,
-        wait: waitForLogs,
-        limit: 500,
-      };
-
+      setIsLoading(true);
       try {
+        const params: GetAktivitetsloggRequest = {
+          ident: ident,
+          limit: 500,
+        };
         const res = await client.getAktivitetslogg(params);
-        if (waitForLogs) {
-          setAktivitetslogger((prevState) => {
-            const combined = [...res, ...prevState];
-            const seen = new Set<string>();
-            return combined.filter((item) => {
-              if (seen.has(item.id)) return false;
-              seen.add(item.id);
-              return true;
-            });
-          });
-        } else {
-          setAktivitetslogger(res);
-        }
+        setAktivitetslogger(res);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [lastSeen, ident, waitForLogs]);
+  }, [ident]);
+
+  const søkTrim = søk.trim().toLowerCase();
+
+  const filtrertData = useMemo(() => {
+    if (!søkTrim) return aktivitetslogger;
+
+    if (UUID_REGEX.test(søkTrim)) {
+      // Søk på behandlingId — filtrer aktiviteter som har denne i kontekst
+      return aktivitetslogger
+        .map((logg) => ({
+          ...logg,
+          aktiviteter: logg.aktiviteter.filter((a) =>
+            a.kontekster.some(
+              (k) => k.kontekstMap["behandlingId"]?.toLowerCase() === søkTrim,
+            ),
+          ),
+        }))
+        .filter((logg) => logg.aktiviteter.length > 0);
+    }
+
+    // Søk på logg-ID
+    return aktivitetslogger.filter((logg) =>
+      logg.id.toLowerCase().includes(søkTrim),
+    );
+  }, [aktivitetslogger, søkTrim]);
+
+  if (isLoading) {
+    return <Loader size="xlarge" title="Henter aktivitetslogger…" />;
+  }
 
   return (
-    <>
-      <form className={styles.form}>
-        <VStack gap="space-16">
-          <HStack gap="space-16" align={"end"} justify={"end"}>
-            <Select
-              label={"Hendelsetype"}
-              defaultValue={filterHendelse}
-              onChange={onHendelseChanged}
-              size={"small"}
-            >
-              <option value="">Alle</option>
-              {hendelser.map((hendelse) => (
-                <option value={hendelse} key={hendelse}>
-                  {hendelse}
-                </option>
-              ))}
-            </Select>
-            <Select
-              label={"Tjeneste"}
-              defaultValue={filterHendelse}
-              onChange={onTjenesteChanged}
-              size={"small"}
-            >
-              <option value="">Alle</option>
-              {tjenester.map((tjeneste) => (
-                <option value={tjeneste} key={tjeneste}>
-                  {tjeneste}
-                </option>
-              ))}
-            </Select>
-            <Checkbox
-              size={"small"}
-              onClick={() => setWaitForLogs(!waitForLogs)}
-              value={waitForLogs}
-            >
-              Følg logg
-            </Checkbox>
-          </HStack>
-          <HStack gap="space-16" align={"end"} justify={"end"}>
-            <Button
-              size="small"
-              variant="secondary-neutral"
-              onClick={() => {
-                setTjenesteFilter("");
-                setHendelseFilter("");
-              }}
-            >
-              Nullstill filter
-            </Button>
-          </HStack>
-        </VStack>
-      </form>
-      <VStack
-        justify={"end"}
-        align={"end"}
-        gap="space-16"
-        style={{ width: "100%", marginRight: "16px" }}
-      >
-        <Label size={"small"}>
-          Antall aktiviteter i søk: {filtrerteAktiviteter.length}
-        </Label>
-      </VStack>
-      <HStack gap="space-16" align="center" style={{ margin: "16px 0" }}>
-        <ToggleGroup
-          value={visning}
-          onChange={(value) => setVisning(value as "tabell" | "tidslinje")}
-          size="small"
-        >
-          <ToggleGroup.Item value="tidslinje">Tidslinje</ToggleGroup.Item>
-          <ToggleGroup.Item value="tabell">Tabell</ToggleGroup.Item>
-        </ToggleGroup>
-      </HStack>
-      {visning === "tabell" ? (
-        <AktivitetsloggTabell
-          isLoading={isLoading}
-          data={filtrerteAktiviteter}
-        />
+    <VStack gap="space-8">
+      <Search
+        label="Søk på behandlingId eller logg-ID"
+        size="small"
+        variant="simple"
+        placeholder="Søk på behandlingId eller logg-ID"
+        value={søk}
+        onChange={setSøk}
+        onClear={() => setSøk("")}
+      />
+      {filtrertData.length === 0 ? (
+        <BodyShort>Ingen behandlinger å vise.</BodyShort>
       ) : (
-        <BehandlingTidslinje data={filtrerteAktiviteter} />
+        <BehandlingTidslinje data={filtrertData} />
       )}
-    </>
+    </VStack>
   );
 }
