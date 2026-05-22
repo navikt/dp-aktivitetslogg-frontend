@@ -114,8 +114,11 @@ function TidslinjeGruppeVisning({
     (a) => a.kategori !== "tilstandsendring" && a.kategori !== "regelkjøring",
   );
 
-  const title = meta ? meta.til : "Aktivitet";
-  const timestamp = tilstandsendring?.original.tidsstempel?.substring(0, 16);
+  const title = meta ? meta.til : (gruppe.tilstand ?? "Oppstart");
+  const timestamp =
+    (
+      tilstandsendring ?? gruppe.aktiviteter[0]
+    )?.original.tidsstempel?.substring(0, 16) ?? undefined;
   const status = isLast ? "active" : "completed";
 
   const hasContent = regelkjøringer.length > 0 || øvrige.length > 0;

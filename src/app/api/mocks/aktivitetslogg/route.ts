@@ -23,10 +23,6 @@ export async function GET(request: Request) {
               kontekstType: "Behandling",
               kontekstMap: { behandlingId: BEHANDLING_1 },
             },
-            {
-              kontekstType: "Tilstand",
-              kontekstMap: { tilstand: "UnderOpprettelse" },
-            },
           ],
           alvorlighetsgrad: "INFO",
           melding: "Tilstandsendring: UnderOpprettelse → UnderBehandling",
@@ -100,15 +96,24 @@ export async function GET(request: Request) {
               kontekstType: "Behandling",
               kontekstMap: { behandlingId: BEHANDLING_1 },
             },
-            {
-              kontekstType: "Tilstand",
-              kontekstMap: { tilstand: "UnderBehandling" },
-            },
           ],
           alvorlighetsgrad: "INFO",
           melding: "Tilstandsendring: UnderBehandling → ForslagTilVedtak",
           detaljer: {},
           tidsstempel: "2024-01-15 10:00:02.100",
+        },
+        {
+          kontekster: [
+            {
+              kontekstType: "Behandling",
+              kontekstMap: { behandlingId: BEHANDLING_1 },
+            },
+          ],
+          alvorlighetsgrad: "INFO",
+          melding:
+            "Behandlingen er ikke automatisk behandlet, krever godkjenning",
+          detaljer: {},
+          tidsstempel: "2024-01-15 10:00:02.200",
         },
       ],
       "@id": "431196e4-14c0-49b1-91ae-899ad7b72e05",
@@ -125,8 +130,8 @@ export async function GET(request: Request) {
     {
       "@event_name": "aktivitetslogg",
       hendelse: {
-        type: "InntektInnhentetHendelse",
-        meldingsreferanseId: "efae249e-743c-4cc9-8ecc-a85f0de23390",
+        type: "AvklaringIkkeRelevantHendelse",
+        meldingsreferanseId: "cc11aa22-1234-5678-abcd-aabbccddeeff",
       },
       ident: "21840298148",
       aktiviteter: [
@@ -138,9 +143,9 @@ export async function GET(request: Request) {
             },
           ],
           alvorlighetsgrad: "INFO",
-          melding: "Beregner krav til minsteinntekt",
+          melding: "Tilstandsendring: ForslagTilVedtak → UnderBehandling",
           detaljer: {},
-          tidsstempel: "2024-01-15 10:05:00.100",
+          tidsstempel: "2024-01-15 11:30:00.100",
         },
         {
           kontekster: [
@@ -152,7 +157,31 @@ export async function GET(request: Request) {
           alvorlighetsgrad: "INFO",
           melding: "Sjekker om minsteinntekt er oppfylt",
           detaljer: {},
-          tidsstempel: "2024-01-15 10:05:00.200",
+          tidsstempel: "2024-01-15 11:30:00.200",
+        },
+        {
+          kontekster: [
+            {
+              kontekstType: "Behandling",
+              kontekstMap: { behandlingId: BEHANDLING_1 },
+            },
+          ],
+          alvorlighetsgrad: "INFO",
+          melding: "Beregner dagsats",
+          detaljer: {},
+          tidsstempel: "2024-01-15 11:30:00.300",
+        },
+        {
+          kontekster: [
+            {
+              kontekstType: "Behandling",
+              kontekstMap: { behandlingId: BEHANDLING_1 },
+            },
+          ],
+          alvorlighetsgrad: "INFO",
+          melding: "Fastsetter antall stønadsuker",
+          detaljer: {},
+          tidsstempel: "2024-01-15 11:30:00.400",
         },
         {
           kontekster: [
@@ -164,7 +193,7 @@ export async function GET(request: Request) {
           alvorlighetsgrad: "INFO",
           melding: "Regelkjøring: 6 regler kjørt, 0 mangler gjenstår",
           detaljer: {},
-          tidsstempel: "2024-01-15 10:05:00.300",
+          tidsstempel: "2024-01-15 11:30:00.500",
         },
         {
           kontekster: [
@@ -176,16 +205,40 @@ export async function GET(request: Request) {
           alvorlighetsgrad: "INFO",
           melding: "Alle vilkår er oppfylt for automatisk vedtak",
           detaljer: {},
-          tidsstempel: "2024-01-15 10:05:00.400",
+          tidsstempel: "2024-01-15 11:30:00.600",
+        },
+        {
+          kontekster: [
+            {
+              kontekstType: "Behandling",
+              kontekstMap: { behandlingId: BEHANDLING_1 },
+            },
+          ],
+          alvorlighetsgrad: "INFO",
+          melding: "Tilstandsendring: UnderBehandling → ForslagTilVedtak",
+          detaljer: {},
+          tidsstempel: "2024-01-15 11:30:00.700",
+        },
+        {
+          kontekster: [
+            {
+              kontekstType: "Behandling",
+              kontekstMap: { behandlingId: BEHANDLING_1 },
+            },
+          ],
+          alvorlighetsgrad: "INFO",
+          melding: "Tilstandsendring: ForslagTilVedtak → Vedtatt",
+          detaljer: {},
+          tidsstempel: "2024-01-15 11:30:00.800",
         },
       ],
-      "@id": "ac48a147-ecf5-4b00-84f9-994ccaf9963b",
-      "@opprettet": "2024-01-15T10:05:00.500",
+      "@id": "dd22bb33-5678-9012-efab-112233445566",
+      "@opprettet": "2024-01-15T11:30:01.000",
       system_read_count: 1,
       system_participating_services: [
         {
-          id: "ac48a147-ecf5-4b00-84f9-994ccaf9963b",
-          time: "2024-01-15T10:05:00.500",
+          id: "dd22bb33-5678-9012-efab-112233445566",
+          time: "2024-01-15T11:30:01.000",
           service: "dp-behandling",
         },
       ],
@@ -204,15 +257,11 @@ export async function GET(request: Request) {
               kontekstType: "Behandling",
               kontekstMap: { behandlingId: BEHANDLING_2 },
             },
-            {
-              kontekstType: "Tilstand",
-              kontekstMap: { tilstand: "UnderOpprettelse" },
-            },
           ],
           alvorlighetsgrad: "INFO",
           melding: "Tilstandsendring: UnderOpprettelse → UnderBehandling",
           detaljer: {},
-          tidsstempel: "2024-01-15 11:00:00.100",
+          tidsstempel: "2024-01-15 12:00:00.100",
         },
         {
           kontekster: [
@@ -224,7 +273,7 @@ export async function GET(request: Request) {
           alvorlighetsgrad: "INFO",
           melding: "Henter opplysninger om fødselsdato fra PDL",
           detaljer: {},
-          tidsstempel: "2024-01-15 11:00:00.200",
+          tidsstempel: "2024-01-15 12:00:00.200",
         },
         {
           kontekster: [
@@ -236,16 +285,16 @@ export async function GET(request: Request) {
           alvorlighetsgrad: "INFO",
           melding: "Har 2 aktive avklaringer, går til manuell behandling",
           detaljer: {},
-          tidsstempel: "2024-01-15 11:00:00.300",
+          tidsstempel: "2024-01-15 12:00:00.300",
         },
       ],
       "@id": "e18dc126-8b92-45d6-b6f7-f4a5947f2af8",
-      "@opprettet": "2024-01-15T11:00:00.400",
+      "@opprettet": "2024-01-15T12:00:00.400",
       system_read_count: 1,
       system_participating_services: [
         {
           id: "e18dc126-8b92-45d6-b6f7-f4a5947f2af8",
-          time: "2024-01-15T11:00:00.400",
+          time: "2024-01-15T12:00:00.400",
           service: "dp-behandling",
         },
       ],
