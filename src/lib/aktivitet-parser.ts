@@ -262,6 +262,9 @@ const IGNORERTE_HENDELSER = new Set([
 
 const IGNORERTE_MELDINGER = [/^Trenger en opplysning \(/];
 
+const NOISE_PATTERN =
+  /^Kan ikke starte behandling av .+: Hendelse av type .+ kan ikke starte/;
+
 export function grupperPerBehandling(
   aktivitetslogger: Aktivitetslogg[],
 ): BehandlingGruppe[] {
@@ -275,6 +278,7 @@ export function grupperPerBehandling(
     for (const aktivitet of logg.aktiviteter) {
       if (IGNORERTE_MELDINGER.some((re) => re.test(aktivitet.melding)))
         continue;
+      if (NOISE_PATTERN.test(aktivitet.melding)) continue;
       const behandlingId = finnBehandlingId(aktivitet) ?? "ukjent";
 
       if (!behandlingMap.has(behandlingId)) {
@@ -293,6 +297,7 @@ export function grupperPerBehandling(
   const grupper: BehandlingGruppe[] = [];
 
   for (const [behandlingId, { aktiviteter, hendelser }] of behandlingMap) {
+    if (aktiviteter.length === 0) continue;
     // Sorter aktiviteter kronologisk
     const sortert = [...aktiviteter].sort((a, b) =>
       a.tidsstempel.localeCompare(b.tidsstempel),
@@ -312,5 +317,8 @@ export function grupperPerBehandling(
     (b.sisteTidsstempel ?? "").localeCompare(a.sisteTidsstempel ?? ""),
   );
 
-  return grupper;
+  // Filtrer bort "ukjent" grupper som bare inneholder støy
+  return grupper.filter(
+    (g) => g.behandlingId !== "ukjent" || g.tidslinjeGrupper.length > 0,
+  );
 }

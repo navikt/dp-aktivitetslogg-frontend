@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useEffect, useState, useMemo } from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import BehandlingTidslinje from "./behandling-tidslinje";
 import {
   Aktivitetslogg,
@@ -27,6 +27,10 @@ export default function AktivitetsloggContainer() {
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [søk, setSøk] = useState("");
+  const [søkeResultat, setSøkeResultat] = useState<Aktivitetslogg[] | null>(
+    null,
+  );
+  const [søker, setSøker] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,30 +50,44 @@ export default function AktivitetsloggContainer() {
     fetchData();
   }, [ident]);
 
-  const søkTrim = søk.trim().toLowerCase();
-
-  const filtrertData = useMemo(() => {
-    if (!søkTrim) return aktivitetslogger;
-
-    if (UUID_REGEX.test(søkTrim)) {
-      // Søk på behandlingId — filtrer aktiviteter som har denne i kontekst
-      return aktivitetslogger
-        .map((logg) => ({
-          ...logg,
-          aktiviteter: logg.aktiviteter.filter((a) =>
-            a.kontekster.some(
-              (k) => k.kontekstMap["behandlingId"]?.toLowerCase() === søkTrim,
-            ),
-          ),
-        }))
-        .filter((logg) => logg.aktiviteter.length > 0);
+  const søkBehandling = useCallback(async (behandlingId: string) => {
+    setSøker(true);
+    setSøkeResultat(null);
+    try {
+      const response = await fetch(
+        `/api/aktivitetslogg/behandling/${behandlingId}`,
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setSøkeResultat(data);
+      } else {
+        setSøkeResultat([]);
+      }
+    } catch {
+      setSøkeResultat([]);
+    } finally {
+      setSøker(false);
     }
+  }, []);
 
-    // Søk på logg-ID
-    return aktivitetslogger.filter((logg) =>
-      logg.id.toLowerCase().includes(søkTrim),
-    );
-  }, [aktivitetslogger, søkTrim]);
+  const handleSøk = useCallback(
+    (value: string) => {
+      setSøk(value);
+      const trimmed = value.trim();
+      if (!trimmed) {
+        setSøkeResultat(null);
+        return;
+      }
+      if (UUID_REGEX.test(trimmed)) {
+        søkBehandling(trimmed);
+      } else {
+        setSøkeResultat(null);
+      }
+    },
+    [søkBehandling],
+  );
+
+  const visData = søkeResultat ?? aktivitetslogger;
 
   if (isLoading) {
     return <Loader size="xlarge" title="Henter aktivitetslogger…" />;
@@ -78,18 +96,27 @@ export default function AktivitetsloggContainer() {
   return (
     <VStack gap="space-8">
       <Search
-        label="Søk på behandlingId eller logg-ID"
+        label="Søk på behandlingId (UUID)"
         size="small"
         variant="simple"
-        placeholder="Søk på behandlingId eller logg-ID"
+        placeholder="Lim inn behandlingId for å søke"
         value={søk}
-        onChange={setSøk}
-        onClear={() => setSøk("")}
+        onChange={handleSøk}
+        onClear={() => {
+          setSøk("");
+          setSøkeResultat(null);
+        }}
       />
-      {filtrertData.length === 0 ? (
-        <BodyShort>Ingen behandlinger å vise.</BodyShort>
+      {søker ? (
+        <Loader size="medium" title="Søker…" />
+      ) : visData.length === 0 ? (
+        <BodyShort>
+          {søkeResultat !== null
+            ? "Ingen aktiviteter funnet for denne behandlingen."
+            : "Ingen behandlinger å vise."}
+        </BodyShort>
       ) : (
-        <BehandlingTidslinje data={filtrertData} />
+        <BehandlingTidslinje data={visData} />
       )}
     </VStack>
   );
