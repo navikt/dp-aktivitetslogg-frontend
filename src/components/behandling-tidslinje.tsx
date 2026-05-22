@@ -225,7 +225,8 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
 
   switch (kategori) {
     case "oppsummering": {
-      const meta = metadata as OppsummeringMeta;
+      const meta = metadata as OppsummeringMeta | null;
+      if (!meta) break;
       return (
         <InlineMessage
           status={meta.antallMangler > 0 ? "warning" : "success"}
@@ -239,7 +240,8 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
       );
     }
     case "informasjonsinnhenting": {
-      const meta = metadata as VentepunktMeta;
+      const meta = metadata as VentepunktMeta | null;
+      if (!meta) break;
       return (
         <InlineMessage status="warning" size="small">
           <VStack gap="space-2">
@@ -254,7 +256,8 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
       );
     }
     case "beslutning": {
-      const meta = metadata as BeslutningMeta;
+      const meta = metadata as BeslutningMeta | null;
+      if (!meta) break;
       return (
         <InlineMessage status="success" size="small">
           {meta.resultat}
@@ -268,4 +271,11 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
         </BodyShort>
       );
   }
+
+  // Fallback når metadata er null (kontekst-basert kategori uten regex-match)
+  return (
+    <BodyShort size="small" textColor="subtle">
+      {original.melding}
+    </BodyShort>
+  );
 }
