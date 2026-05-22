@@ -145,7 +145,9 @@ function TidslinjeGruppeVisning({
     (a) =>
       a.kategori !== "tilstandsendring" &&
       a.kategori !== "regelkjøring" &&
-      a.kategori !== "mottok_svar",
+      a.kategori !== "mottok_svar" &&
+      a.kategori !== "oppsummering" &&
+      a.kategori !== "informasjonsinnhenting",
   );
 
   // Hvis gruppen kun består av mottok_svar, vis "Mottok svar" som tittel
@@ -174,7 +176,14 @@ function TidslinjeGruppeVisning({
     >
       {hasContent && (
         <VStack gap="space-4">
-          {regelkjøringer.length > 0 && <RegelGruppe regler={regelkjøringer} />}
+          {regelkjøringer.length > 0 && (
+            <RegelGruppe
+              regler={regelkjøringer}
+              informasjonsinnhenting={gruppe.aktiviteter.filter(
+                (a) => a.kategori === "informasjonsinnhenting",
+              )}
+            />
+          )}
           {mottokSvar.length > 0 && (
             <MottokSvarGruppe opplysninger={mottokSvar} />
           )}
@@ -187,15 +196,40 @@ function TidslinjeGruppeVisning({
   );
 }
 
-function RegelGruppe({ regler }: { regler: ParsetAktivitet[] }) {
+function RegelGruppe({
+  regler,
+  informasjonsinnhenting,
+}: {
+  regler: ParsetAktivitet[];
+  informasjonsinnhenting: ParsetAktivitet[];
+}) {
+  const ventepunkt = informasjonsinnhenting.find((a) => a.metadata !== null);
+  const opplysninger = ventepunkt
+    ? (ventepunkt.metadata as VentepunktMeta).opplysninger
+    : [];
+
   return (
-    <ReadMore header={`${regler.length} regler evaluert`} size="small">
-      <List size="small">
-        {regler.map((regel, index) => (
-          <List.Item key={index}>{regel.original.melding}</List.Item>
-        ))}
-      </List>
-    </ReadMore>
+    <VStack gap="space-2">
+      <ReadMore header={`Kjørte ${regler.length} regler`} size="small">
+        <List size="small">
+          {regler.map((regel, index) => (
+            <List.Item key={index}>{regel.original.melding}</List.Item>
+          ))}
+        </List>
+      </ReadMore>
+      {opplysninger.length > 0 && (
+        <InlineMessage status="warning" size="small">
+          <VStack gap="space-2">
+            <span>Innhenter {opplysninger.length} opplysninger:</span>
+            <List size="small" as="ul">
+              {opplysninger.map((opplysning, i) => (
+                <List.Item key={i}>{opplysning}</List.Item>
+              ))}
+            </List>
+          </VStack>
+        </InlineMessage>
+      )}
+    </VStack>
   );
 }
 
