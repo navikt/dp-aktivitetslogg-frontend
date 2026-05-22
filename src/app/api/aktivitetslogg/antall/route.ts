@@ -4,6 +4,10 @@ import { getOboToken, getAzureToken } from "@/lib/auth";
 export const revalidate = 0;
 
 export async function GET(request: Request) {
+  if (process.env.IS_LOCALHOST === "true" && !process.env.API_BASE_URL) {
+    return NextResponse.json({ antall: 3 });
+  }
+
   const token = await getAzureToken(request);
 
   if (!token)
