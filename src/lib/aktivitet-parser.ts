@@ -204,6 +204,8 @@ export interface BehandlingGruppe {
  * Grupperer aktivitetslogger per behandlingId.
  * Aktiviteter uten behandlingId havner i en "Ukjent"-gruppe.
  */
+const IGNORERTE_HENDELSER = new Set(["audit_logg", "aktivitetslogg"]);
+
 export function grupperPerBehandling(
   aktivitetslogger: Aktivitetslogg[],
 ): BehandlingGruppe[] {
@@ -213,6 +215,7 @@ export function grupperPerBehandling(
   >();
 
   for (const logg of aktivitetslogger) {
+    if (IGNORERTE_HENDELSER.has(logg.hendelse.type)) continue;
     for (const aktivitet of logg.aktiviteter) {
       const behandlingId = finnBehandlingId(aktivitet) ?? "ukjent";
 

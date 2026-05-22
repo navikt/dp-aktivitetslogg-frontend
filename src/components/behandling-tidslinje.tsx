@@ -20,9 +20,9 @@ import {
   VStack,
   Tag,
   ReadMore,
-  Box,
   List,
   InlineMessage,
+  Process,
 } from "@navikt/ds-react";
 import styles from "./behandling-tidslinje.module.css";
 
@@ -81,17 +81,27 @@ function BehandlingKort({ behandling }: { behandling: BehandlingGruppe }) {
         </ExpansionCard.Description>
       </ExpansionCard.Header>
       <ExpansionCard.Content>
-        <div className={styles.tidslinje}>
+        <Process aria-label={`Prosess for behandling ${kortId}`}>
           {behandling.tidslinjeGrupper.map((gruppe, index) => (
-            <TidslinjeGruppeVisning key={index} gruppe={gruppe} />
+            <TidslinjeGruppeVisning
+              key={index}
+              gruppe={gruppe}
+              isLast={index === behandling.tidslinjeGrupper.length - 1}
+            />
           ))}
-        </div>
+        </Process>
       </ExpansionCard.Content>
     </ExpansionCard>
   );
 }
 
-function TidslinjeGruppeVisning({ gruppe }: { gruppe: TidslinjeGruppe }) {
+function TidslinjeGruppeVisning({
+  gruppe,
+  isLast,
+}: {
+  gruppe: TidslinjeGruppe;
+  isLast: boolean;
+}) {
   const tilstandsendring = gruppe.aktiviteter.find(
     (a) => a.kategori === "tilstandsendring",
   );
@@ -104,24 +114,28 @@ function TidslinjeGruppeVisning({ gruppe }: { gruppe: TidslinjeGruppe }) {
     (a) => a.kategori !== "tilstandsendring" && a.kategori !== "regelkjøring",
   );
 
-  return (
-    <div className={styles.gruppe}>
-      {meta && (
-        <div className={styles.milepæl}>
-          <BodyShort size="small" weight="semibold">
-            {meta.til}
-          </BodyShort>
-          <Detail>← {meta.fra}</Detail>
-        </div>
-      )}
+  const title = meta ? meta.til : "Aktivitet";
+  const timestamp = tilstandsendring?.original.tidsstempel?.substring(0, 16);
+  const status = isLast ? "active" : "completed";
 
-      <VStack gap="space-2" className={styles.gruppeInnhold}>
-        {regelkjøringer.length > 0 && <RegelGruppe regler={regelkjøringer} />}
-        {øvrige.map((aktivitet, index) => (
-          <AktivitetKort key={index} aktivitet={aktivitet} />
-        ))}
-      </VStack>
-    </div>
+  const hasContent = regelkjøringer.length > 0 || øvrige.length > 0;
+
+  return (
+    <Process.Event
+      title={title}
+      timestamp={timestamp}
+      status={status}
+      hideContent={!hasContent}
+    >
+      {hasContent && (
+        <VStack gap="space-4">
+          {regelkjøringer.length > 0 && <RegelGruppe regler={regelkjøringer} />}
+          {øvrige.map((aktivitet, index) => (
+            <AktivitetKort key={index} aktivitet={aktivitet} />
+          ))}
+        </VStack>
+      )}
+    </Process.Event>
   );
 }
 
@@ -187,9 +201,9 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
     }
     default:
       return (
-        <Box paddingInline="space-6">
-          <Detail textColor="subtle">{original.melding}</Detail>
-        </Box>
+        <BodyShort size="small" textColor="subtle">
+          {original.melding}
+        </BodyShort>
       );
   }
 }
