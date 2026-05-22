@@ -219,12 +219,12 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
       const meta = metadata as BeslutningMeta;
       return (
         <InlineMessage status="success" size="small">
-          <HStack gap="space-2" align="center">
+          <VStack gap="space-2">
             <span>{meta.resultat}</span>
             <Tag variant="info" size="xsmall">
               Årsak: {meta.grunn}
             </Tag>
-          </HStack>
+          </VStack>
         </InlineMessage>
       );
     }
