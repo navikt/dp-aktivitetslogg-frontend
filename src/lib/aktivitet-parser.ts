@@ -210,6 +210,8 @@ const IGNORERTE_HENDELSER = new Set([
   "aktivitetslogg",
 ]);
 
+const IGNORERTE_MELDINGER = [/^Trenger en opplysning \(/];
+
 export function grupperPerBehandling(
   aktivitetslogger: Aktivitetslogg[],
 ): BehandlingGruppe[] {
@@ -221,6 +223,8 @@ export function grupperPerBehandling(
   for (const logg of aktivitetslogger) {
     if (IGNORERTE_HENDELSER.has(logg.hendelse.type.toLowerCase())) continue;
     for (const aktivitet of logg.aktiviteter) {
+      if (IGNORERTE_MELDINGER.some((re) => re.test(aktivitet.melding)))
+        continue;
       const behandlingId = finnBehandlingId(aktivitet) ?? "ukjent";
 
       if (!behandlingMap.has(behandlingId)) {

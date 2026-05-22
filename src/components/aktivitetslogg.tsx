@@ -97,6 +97,7 @@ export default function AktivitetsloggContainer() {
         ident: ident,
         since: lastSeen,
         wait: waitForLogs,
+        limit: 500,
       };
 
       try {
