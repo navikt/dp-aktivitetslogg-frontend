@@ -33,12 +33,12 @@ jobs:
           path: ./node_modules
           key: modules-${{ hashFiles('pnpm-lock.yaml') }}
 
-      - run: npm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
-      - run: pnpm rebuild && pnpm run prepare
+      - run: pnpm run prepare
       - run: pnpm run build
-      - run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json
+      - run: pnpm dlx @cyclonedx/cyclonedx-npm --output-file sbom.json
 
       - name: docker-build-push
         uses: nais/docker-build-push@v0
