@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Aktivitetslogg } from "@/lib/aktivitetslogg-api";
 import {
   grupperPerBehandling,
@@ -15,6 +15,7 @@ import {
 } from "@/lib/aktivitet-parser";
 import {
   BodyShort,
+  Button,
   CopyButton,
   Detail,
   ExpansionCard,
@@ -62,7 +63,7 @@ export default function BehandlingTidslinje({ data }: Props) {
   }
 
   return (
-    <VStack gap="space-6">
+    <VStack gap="space-6" className={styles.container}>
       {behandlinger.map((behandling) => (
         <BehandlingKort key={behandling.behandlingId} behandling={behandling} />
       ))}
@@ -71,6 +72,7 @@ export default function BehandlingTidslinje({ data }: Props) {
 }
 
 function BehandlingKort({ behandling }: { behandling: BehandlingGruppe }) {
+  const [expandAll, setExpandAll] = useState(false);
   const kortId =
     behandling.behandlingId === "ukjent"
       ? "Uten behandling"
@@ -99,25 +101,33 @@ function BehandlingKort({ behandling }: { behandling: BehandlingGruppe }) {
           </HStack>
         </ExpansionCard.Title>
         <ExpansionCard.Description>
-          <HStack gap="space-2" wrap align="center">
-            {tidsrom && (
-              <Detail as="span" className={styles.tidsrom}>
-                {tidsrom}
-              </Detail>
-            )}
-          </HStack>
+          {tidsrom && (
+            <Detail as="span" className={styles.tidsrom}>
+              {tidsrom}
+            </Detail>
+          )}
         </ExpansionCard.Description>
       </ExpansionCard.Header>
       <ExpansionCard.Content>
-        <Process aria-label={`Prosess for behandling ${kortId}`}>
-          {behandling.tidslinjeGrupper.map((gruppe, index) => (
-            <TidslinjeGruppeVisning
-              key={index}
-              gruppe={gruppe}
-              isLast={index === behandling.tidslinjeGrupper.length - 1}
-            />
-          ))}
-        </Process>
+        <VStack gap="space-4">
+          <Button
+            variant="tertiary"
+            size="xsmall"
+            onClick={() => setExpandAll((prev) => !prev)}
+          >
+            {expandAll ? "Kollaps alt" : "Ekspander alt"}
+          </Button>
+          <Process aria-label={`Prosess for behandling ${kortId}`}>
+            {behandling.tidslinjeGrupper.map((gruppe, index) => (
+              <TidslinjeGruppeVisning
+                key={index}
+                gruppe={gruppe}
+                isLast={index === behandling.tidslinjeGrupper.length - 1}
+                expandAll={expandAll}
+              />
+            ))}
+          </Process>
+        </VStack>
       </ExpansionCard.Content>
     </ExpansionCard>
   );
@@ -126,9 +136,11 @@ function BehandlingKort({ behandling }: { behandling: BehandlingGruppe }) {
 function TidslinjeGruppeVisning({
   gruppe,
   isLast,
+  expandAll,
 }: {
   gruppe: TidslinjeGruppe;
   isLast: boolean;
+  expandAll: boolean;
 }) {
   const tilstandsendring = gruppe.aktiviteter.find(
     (a) => a.kategori === "tilstandsendring",
@@ -182,10 +194,11 @@ function TidslinjeGruppeVisning({
               informasjonsinnhenting={gruppe.aktiviteter.filter(
                 (a) => a.kategori === "informasjonsinnhenting",
               )}
+              open={expandAll}
             />
           )}
           {mottokSvar.length > 0 && (
-            <MottokSvarGruppe opplysninger={mottokSvar} />
+            <MottokSvarGruppe opplysninger={mottokSvar} open={expandAll} />
           )}
           {øvrige.map((aktivitet, index) => (
             <AktivitetKort key={index} aktivitet={aktivitet} />
@@ -199,9 +212,11 @@ function TidslinjeGruppeVisning({
 function RegelGruppe({
   regler,
   informasjonsinnhenting,
+  open,
 }: {
   regler: ParsetAktivitet[];
   informasjonsinnhenting: ParsetAktivitet[];
+  open: boolean;
 }) {
   const ventepunkt = informasjonsinnhenting.find((a) => a.metadata !== null);
   const opplysninger = ventepunkt
@@ -210,7 +225,11 @@ function RegelGruppe({
 
   return (
     <VStack gap="space-2">
-      <ReadMore header={`Kjørte ${regler.length} regler`} size="small">
+      <ReadMore
+        header={`Kjørte ${regler.length} regler`}
+        size="small"
+        open={open || undefined}
+      >
         <List size="small">
           {regler.map((regel, index) => (
             <List.Item key={index}>{regel.original.melding}</List.Item>
@@ -218,16 +237,17 @@ function RegelGruppe({
         </List>
       </ReadMore>
       {opplysninger.length > 0 && (
-        <InlineMessage status="warning" size="small">
-          <VStack gap="space-2">
-            <span>Innhenter {opplysninger.length} opplysninger:</span>
-            <List size="small" as="ul">
-              {opplysninger.map((opplysning, i) => (
-                <List.Item key={i}>{opplysning}</List.Item>
-              ))}
-            </List>
-          </VStack>
-        </InlineMessage>
+        <ReadMore
+          header={`Innhenter ${opplysninger.length} opplysninger`}
+          size="small"
+          open={open || undefined}
+        >
+          <List size="small">
+            {opplysninger.map((opplysning, i) => (
+              <List.Item key={i}>{opplysning}</List.Item>
+            ))}
+          </List>
+        </ReadMore>
       )}
     </VStack>
   );
@@ -235,13 +255,16 @@ function RegelGruppe({
 
 function MottokSvarGruppe({
   opplysninger,
+  open,
 }: {
   opplysninger: ParsetAktivitet[];
+  open: boolean;
 }) {
   return (
     <ReadMore
       header={`Mottok svar på ${opplysninger.length} opplysninger`}
       size="small"
+      open={open || undefined}
     >
       <List size="small">
         {opplysninger.map((item, index) => (
@@ -277,16 +300,16 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
       const meta = metadata as VentepunktMeta | null;
       if (!meta) break;
       return (
-        <InlineMessage status="warning" size="small">
-          <VStack gap="space-2">
-            <span>Venter på opplysninger</span>
-            <List size="small" as="ul">
-              {meta.opplysninger.map((opplysning, i) => (
-                <List.Item key={i}>{opplysning}</List.Item>
-              ))}
-            </List>
-          </VStack>
-        </InlineMessage>
+        <ReadMore
+          header={`Innhenter ${meta.opplysninger.length} opplysninger`}
+          size="small"
+        >
+          <List size="small">
+            {meta.opplysninger.map((opplysning, i) => (
+              <List.Item key={i}>{opplysning}</List.Item>
+            ))}
+          </List>
+        </ReadMore>
       );
     }
     case "beslutning": {
@@ -298,12 +321,21 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
         </InlineMessage>
       );
     }
-    default:
+    default: {
+      // Avklaring-meldinger skiller seg ut visuelt
+      if (original.melding.startsWith("Avklaring")) {
+        return (
+          <InlineMessage status="info" size="small">
+            {original.melding}
+          </InlineMessage>
+        );
+      }
       return (
         <BodyShort size="small" textColor="subtle">
           {original.melding}
         </BodyShort>
       );
+    }
   }
 
   // Fallback når metadata er null (kontekst-basert kategori uten regex-match)

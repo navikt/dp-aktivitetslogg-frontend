@@ -1,3 +1,19 @@
 .tidsrom {
   margin-left: auto;
 }
+
+.container {
+  width: 800px;
+}
+
+.kompaktListe {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.kompaktListe li {
+  margin: 0;
+  padding: 0;
+  line-height: 1.4;
+}
