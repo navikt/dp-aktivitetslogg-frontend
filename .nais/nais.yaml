@@ -34,10 +34,10 @@ spec:
     application:
       enabled: true
       allowAllUsers: false
-      tenant: nav.no
+      tenant: trygdeetaten.no
       claims:
         groups:
-          - id: 4edb2ce5-4f0e-4f6f-9b82-b8e75e9dd09e # teamdagpenger
+          - id: "3e28466f-c53d-46da-8b44-a4abc2ad4593" # 0000-GA-Dagpenger-Saksbehandler
     sidecar:
       enabled: true
       autoLogin: true
