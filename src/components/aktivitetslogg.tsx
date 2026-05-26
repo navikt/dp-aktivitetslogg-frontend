@@ -18,12 +18,11 @@ const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function AktivitetsloggContainer() {
-  const { encryptIdent, identToSearchFor } =
+  const { identToSearchFor } =
     useContext<IApplicationContext>(ApplicationContext);
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const ident = encryptIdent(identToSearchFor);
   const initialSøk = searchParams.get("behandlingId") ?? "";
 
   const [aktivitetslogger, setAktivitetslogger] = useState<Aktivitetslogg[]>(
@@ -37,11 +36,13 @@ export default function AktivitetsloggContainer() {
   const [søker, setSøker] = useState(false);
 
   useEffect(() => {
+    if (!identToSearchFor) return;
+
     const fetchData = async () => {
       setIsLoading(true);
       try {
         const params: GetAktivitetsloggRequest = {
-          ident: ident,
+          ident: identToSearchFor,
           limit: 500,
         };
         const res = await client.getAktivitetslogg(params);
@@ -52,7 +53,7 @@ export default function AktivitetsloggContainer() {
     };
 
     fetchData();
-  }, [ident]);
+  }, [identToSearchFor]);
 
   const søkBehandling = useCallback(async (behandlingId: string) => {
     setSøker(true);

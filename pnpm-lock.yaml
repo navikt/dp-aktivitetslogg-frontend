@@ -32,9 +32,6 @@ importers:
       eslint-config-next:
         specifier: 16.0.7
         version: 16.0.7(@typescript-eslint/parser@8.58.1(eslint@9.39.4)(typescript@6.0.2))(eslint@9.39.4)(typescript@6.0.2)
-      jsencrypt:
-        specifier: ^3.5.4
-        version: 3.5.4
       next:
         specifier: 16.0.7
         version: 16.0.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -2046,9 +2043,6 @@ packages:
     peerDependenciesMeta:
       '@babel/preset-env':
         optional: true
-
-  jsencrypt@3.5.4:
-    resolution: {integrity: sha512-kNjfYEMNASxrDGsmcSQh/rUTmcoRfSUkxnAz+MMywM8jtGu+fFEZ3nJjHM58zscVnwR0fYmG9sGkTDjqUdpiwA==}
 
   jsesc@3.1.0:
     resolution: {integrity: sha512-/sM3dO2FOzXjKQhJuo0Q173wf2KOo8t4I8vHy6lF9poUp7bKT0/NHE8fPX23PwfhnykfqnC2xRxOnVw5XuGIaA==}
@@ -5147,8 +5141,6 @@ snapshots:
       write-file-atomic: 5.0.1
     transitivePeerDependencies:
       - supports-color
-
-  jsencrypt@3.5.4: {}
 
   jsesc@3.1.0: {}
 
