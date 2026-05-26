@@ -29,8 +29,7 @@ spec:
     requests:
       cpu: 50m
       memory: 128Mi
-  ingresses:
-    - {{ingress}}
+  {{ ingresses }}
   azure:
     application:
       enabled: true

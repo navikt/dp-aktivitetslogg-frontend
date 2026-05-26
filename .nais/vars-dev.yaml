@@ -1,1 +1,3 @@
-ingress: https://dp-aktivitetslogg-frontend.intern.dev.nav.no
+ingresses: |
+  ingresses:
+    - https://dp-aktivitetslogg-frontend.intern.dev.nav.no
