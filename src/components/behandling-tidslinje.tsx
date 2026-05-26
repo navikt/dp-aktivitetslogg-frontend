@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Aktivitetslogg } from "@/lib/aktivitetslogg-api";
 import {
   grupperPerBehandling,
@@ -15,7 +15,6 @@ import {
 } from "@/lib/aktivitet-parser";
 import {
   BodyShort,
-  Button,
   CopyButton,
   Detail,
   ExpansionCard,
@@ -72,7 +71,6 @@ export default function BehandlingTidslinje({ data }: Props) {
 }
 
 function BehandlingKort({ behandling }: { behandling: BehandlingGruppe }) {
-  const [expandAll, setExpandAll] = useState(false);
   const kortId =
     behandling.behandlingId === "ukjent"
       ? "Uten behandling"
@@ -111,25 +109,15 @@ function BehandlingKort({ behandling }: { behandling: BehandlingGruppe }) {
         </ExpansionCard.Description>
       </ExpansionCard.Header>
       <ExpansionCard.Content>
-        <VStack gap="space-4">
-          <Button
-            variant="tertiary"
-            size="xsmall"
-            onClick={() => setExpandAll((prev) => !prev)}
-          >
-            {expandAll ? "Kollaps alt" : "Ekspander alt"}
-          </Button>
-          <Process aria-label={`Prosess for behandling ${kortId}`}>
-            {behandling.tidslinjeGrupper.map((gruppe, index) => (
-              <TidslinjeGruppeVisning
-                key={index}
-                gruppe={gruppe}
-                isLast={index === behandling.tidslinjeGrupper.length - 1}
-                expandAll={expandAll}
-              />
-            ))}
-          </Process>
-        </VStack>
+        <Process aria-label={`Prosess for behandling ${kortId}`}>
+          {behandling.tidslinjeGrupper.map((gruppe, index) => (
+            <TidslinjeGruppeVisning
+              key={index}
+              gruppe={gruppe}
+              isLast={index === behandling.tidslinjeGrupper.length - 1}
+            />
+          ))}
+        </Process>
       </ExpansionCard.Content>
     </ExpansionCard>
   );
@@ -138,11 +126,9 @@ function BehandlingKort({ behandling }: { behandling: BehandlingGruppe }) {
 function TidslinjeGruppeVisning({
   gruppe,
   isLast,
-  expandAll,
 }: {
   gruppe: TidslinjeGruppe;
   isLast: boolean;
-  expandAll: boolean;
 }) {
   const tilstandsendring = gruppe.aktiviteter.find(
     (a) => a.kategori === "tilstandsendring",
@@ -196,11 +182,10 @@ function TidslinjeGruppeVisning({
               informasjonsinnhenting={gruppe.aktiviteter.filter(
                 (a) => a.kategori === "informasjonsinnhenting",
               )}
-              open={expandAll}
             />
           )}
           {mottokSvar.length > 0 && (
-            <MottokSvarGruppe opplysninger={mottokSvar} open={expandAll} />
+            <MottokSvarGruppe opplysninger={mottokSvar} />
           )}
           {øvrige.map((aktivitet, index) => (
             <AktivitetKort key={index} aktivitet={aktivitet} />
@@ -214,11 +199,9 @@ function TidslinjeGruppeVisning({
 function RegelGruppe({
   regler,
   informasjonsinnhenting,
-  open,
 }: {
   regler: ParsetAktivitet[];
   informasjonsinnhenting: ParsetAktivitet[];
-  open: boolean;
 }) {
   const ventepunkt = informasjonsinnhenting.find((a) => a.metadata !== null);
   const opplysninger = ventepunkt
@@ -227,11 +210,7 @@ function RegelGruppe({
 
   return (
     <VStack gap="space-2">
-      <ReadMore
-        header={`Kjørte ${regler.length} regler`}
-        size="small"
-        open={open || undefined}
-      >
+      <ReadMore header={`Kjørte ${regler.length} regler`} size="small">
         <List size="small">
           {regler.map((regel, index) => (
             <List.Item key={index}>{regel.original.melding}</List.Item>
@@ -242,7 +221,6 @@ function RegelGruppe({
         <ReadMore
           header={`Innhenter ${opplysninger.length} opplysninger`}
           size="small"
-          open={open || undefined}
         >
           <List size="small">
             {opplysninger.map((opplysning, i) => (
@@ -257,16 +235,13 @@ function RegelGruppe({
 
 function MottokSvarGruppe({
   opplysninger,
-  open,
 }: {
   opplysninger: ParsetAktivitet[];
-  open: boolean;
 }) {
   return (
     <ReadMore
       header={`Mottok svar på ${opplysninger.length} opplysninger`}
       size="small"
-      open={open || undefined}
     >
       <List size="small">
         {opplysninger.map((item, index) => (
