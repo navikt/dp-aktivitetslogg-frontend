@@ -96,6 +96,8 @@ function BehandlingKort({ behandling }: { behandling: BehandlingGruppe }) {
                 copyText={behandling.behandlingId}
                 size="xsmall"
                 onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
               />
             )}
           </HStack>
