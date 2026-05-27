@@ -34,10 +34,10 @@ spec:
     application:
       enabled: true
       allowAllUsers: false
-      tenant: trygdeetaten.no
+      tenant: {{azure.tenant}}
       claims:
         groups:
-          - id: "3e28466f-c53d-46da-8b44-a4abc2ad4593" # 0000-GA-Dagpenger-Saksbehandler
+          - id: {{azure.grupper.saksbehandler}}
     sidecar:
       enabled: true
       autoLogin: true
