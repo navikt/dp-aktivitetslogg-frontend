@@ -12,6 +12,7 @@ import {
   OppsummeringMeta,
   VentepunktMeta,
   BeslutningMeta,
+  UtfallMeta,
 } from "@/lib/aktivitet-parser";
 import {
   BodyShort,
@@ -287,6 +288,21 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
             ))}
           </List>
         </ReadMore>
+      );
+    }
+    case "utfall": {
+      const meta = metadata as UtfallMeta | null;
+      const utfallText = meta?.utfall ?? original.melding;
+      const isInnvilget = utfallText.toLowerCase().includes("innvilg");
+      const isAvslag = utfallText.toLowerCase().includes("avslag");
+      return (
+        <InlineMessage
+          status={isInnvilget ? "success" : isAvslag ? "error" : "info"}
+          size="small"
+          style={{ fontWeight: "bold" }}
+        >
+          ✦ {utfallText}
+        </InlineMessage>
       );
     }
     case "beslutning": {

@@ -38,6 +38,9 @@ export default function AktivitetsloggContainer() {
   useEffect(() => {
     if (!identToSearchFor) return;
 
+    setSøkeResultat(null);
+    setSøk("");
+
     const fetchData = async () => {
       setIsLoading(true);
       try {
