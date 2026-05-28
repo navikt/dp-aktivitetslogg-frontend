@@ -8,6 +8,7 @@ export type AktivitetKategori =
   | "mottok_svar"
   | "beslutning"
   | "avgjørelse"
+  | "vilkårsvurdering"
   | "info";
 
 export interface ParsetAktivitet {
@@ -21,6 +22,7 @@ export interface ParsetAktivitet {
     | MottokSvarMeta
     | BeslutningMeta
     | AvgjørelseMeta
+    | VilkårsvurderingMeta
     | null;
 }
 
@@ -63,11 +65,26 @@ export interface MottokSvarMeta {
   opplysning: string;
 }
 
+export interface VilkårsvurderingMeta {
+  type: "oppsummering" | "vilkår";
+  antallVilkår?: number;
+  antallOppfylt?: number;
+  antallIkkeOppfylt?: number;
+  antallMangler?: number;
+  alleOppfylt?: boolean;
+  vilkårNavn?: string;
+  status?: "oppfylt" | "ikke_oppfylt" | "mangler";
+  gyldighet?: string;
+}
+
 const TILSTANDSENDRING_REGEX = /^Tilstandsendring: (.+) → (.+)$/;
 const OPPSUMMERING_REGEX =
   /^Regelkjøring: (\d+) regler kjørt, (\d+) mangler gjenstår$/;
 const VENTEPUNKT_REGEX = /^Trenger ekstern informasjon: (.+)$/;
 const AVGJØRELSE_REGEX = /^Avgjørelse: (.+)$/;
+const RETTIGHETSPERIODE_OPPSUMMERING_REGEX =
+  /^Rettighetsperiode: (\d+) vilkår vurdert(.*)$/;
+const VILKÅR_DETALJ_REGEX = /^([✓✗⊘]) (.+?)(?:\s+\((.+)\))?$/;
 const BESLUTNING_REGEXES = [
   {
     regex: /^Har (\d+) aktive avklaringer, går til (.+)$/,
@@ -141,6 +158,57 @@ export function parseAktivitet(aktivitet: Aktivitet): ParsetAktivitet {
       original: aktivitet,
       kategori: "avgjørelse",
       metadata: { avgjørelse: avgjørelseMatch[1] },
+    };
+  }
+
+  // Vilkårsvurdering - oppsummering
+  const rettighetsperiodeMatch = melding.match(
+    RETTIGHETSPERIODE_OPPSUMMERING_REGEX,
+  );
+  if (rettighetsperiodeMatch) {
+    const antallVilkår = parseInt(rettighetsperiodeMatch[1], 10);
+    const detaljer = rettighetsperiodeMatch[2];
+    const alleOppfylt = detaljer.includes("alle oppfylt");
+    const oppfyltMatch = detaljer.match(/(\d+) oppfylt/);
+    const ikkeOppfyltMatch = detaljer.match(/(\d+) ikke oppfylt/);
+    const manglerMatch = detaljer.match(/(\d+) mangler/);
+    return {
+      original: aktivitet,
+      kategori: "vilkårsvurdering",
+      metadata: {
+        type: "oppsummering",
+        antallVilkår,
+        alleOppfylt,
+        antallOppfylt: alleOppfylt
+          ? antallVilkår
+          : oppfyltMatch
+            ? parseInt(oppfyltMatch[1], 10)
+            : 0,
+        antallIkkeOppfylt: ikkeOppfyltMatch
+          ? parseInt(ikkeOppfyltMatch[1], 10)
+          : 0,
+        antallMangler: manglerMatch ? parseInt(manglerMatch[1], 10) : 0,
+      } satisfies VilkårsvurderingMeta,
+    };
+  }
+
+  // Vilkårsvurdering - enkelt vilkår
+  const vilkårMatch = melding.match(VILKÅR_DETALJ_REGEX);
+  if (vilkårMatch) {
+    const statusMap: Record<string, "oppfylt" | "ikke_oppfylt" | "mangler"> = {
+      "✓": "oppfylt",
+      "✗": "ikke_oppfylt",
+      "⊘": "mangler",
+    };
+    return {
+      original: aktivitet,
+      kategori: "vilkårsvurdering",
+      metadata: {
+        type: "vilkår",
+        vilkårNavn: vilkårMatch[2],
+        status: statusMap[vilkårMatch[1]],
+        gyldighet: vilkårMatch[3] || undefined,
+      } satisfies VilkårsvurderingMeta,
     };
   }
 

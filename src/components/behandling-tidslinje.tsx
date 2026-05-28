@@ -13,6 +13,7 @@ import {
   VentepunktMeta,
   BeslutningMeta,
   AvgjørelseMeta,
+  VilkårsvurderingMeta,
 } from "@/lib/aktivitet-parser";
 import {
   BodyShort,
@@ -312,6 +313,48 @@ function AktivitetKort({ aktivitet }: { aktivitet: ParsetAktivitet }) {
         <InlineMessage status="success" size="small">
           {meta.resultat}
         </InlineMessage>
+      );
+    }
+    case "vilkårsvurdering": {
+      const meta = metadata as VilkårsvurderingMeta | null;
+      if (!meta) break;
+      if (meta.type === "oppsummering") {
+        return (
+          <InlineMessage
+            status={meta.alleOppfylt ? "success" : "warning"}
+            size="small"
+            style={{ fontWeight: "bold" }}
+          >
+            Rettighetsperiode: {meta.antallVilkår} vilkår
+            {meta.alleOppfylt
+              ? " — alle oppfylt"
+              : ` — ${meta.antallOppfylt} oppfylt, ${meta.antallIkkeOppfylt} ikke oppfylt${meta.antallMangler ? `, ${meta.antallMangler} mangler` : ""}`}
+          </InlineMessage>
+        );
+      }
+      // Enkelt vilkår
+      const statusIcon =
+        meta.status === "oppfylt"
+          ? "✓"
+          : meta.status === "ikke_oppfylt"
+            ? "✗"
+            : "⊘";
+      const color =
+        meta.status === "oppfylt"
+          ? "var(--a-text-success)"
+          : meta.status === "ikke_oppfylt"
+            ? "var(--a-text-danger)"
+            : "var(--a-text-subtle)";
+      return (
+        <BodyShort size="small" style={{ color, paddingLeft: "1.5rem" }}>
+          {statusIcon} {meta.vilkårNavn}
+          {meta.gyldighet && (
+            <span style={{ color: "var(--a-text-subtle)" }}>
+              {" "}
+              ({meta.gyldighet})
+            </span>
+          )}
+        </BodyShort>
       );
     }
     default: {
