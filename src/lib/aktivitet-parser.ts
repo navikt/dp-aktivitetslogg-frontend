@@ -7,7 +7,7 @@ export type AktivitetKategori =
   | "informasjonsinnhenting"
   | "mottok_svar"
   | "beslutning"
-  | "utfall"
+  | "avgjørelse"
   | "info";
 
 export interface ParsetAktivitet {
@@ -20,7 +20,7 @@ export interface ParsetAktivitet {
     | VentepunktMeta
     | MottokSvarMeta
     | BeslutningMeta
-    | UtfallMeta
+    | AvgjørelseMeta
     | null;
 }
 
@@ -55,8 +55,8 @@ export interface BeslutningMeta {
   resultat: string;
 }
 
-export interface UtfallMeta {
-  utfall: string;
+export interface AvgjørelseMeta {
+  avgjørelse: string;
 }
 
 export interface MottokSvarMeta {
@@ -67,7 +67,7 @@ const TILSTANDSENDRING_REGEX = /^Tilstandsendring: (.+) → (.+)$/;
 const OPPSUMMERING_REGEX =
   /^Regelkjøring: (\d+) regler kjørt, (\d+) mangler gjenstår$/;
 const VENTEPUNKT_REGEX = /^Trenger ekstern informasjon: (.+)$/;
-const UTFALL_REGEX = /^Utfall(?: for behandlingen)?: (.+)$/;
+const AVGJØRELSE_REGEX = /^Avgjørelse: (.+)$/;
 const BESLUTNING_REGEXES = [
   {
     regex: /^Har (\d+) aktive avklaringer, går til (.+)$/,
@@ -134,13 +134,13 @@ export function parseAktivitet(aktivitet: Aktivitet): ParsetAktivitet {
     };
   }
 
-  // Utfall
-  const utfallMatch = melding.match(UTFALL_REGEX);
-  if (utfallMatch) {
+  // Avgjørelse
+  const avgjørelseMatch = melding.match(AVGJØRELSE_REGEX);
+  if (avgjørelseMatch) {
     return {
       original: aktivitet,
-      kategori: "utfall",
-      metadata: { utfall: utfallMatch[1] },
+      kategori: "avgjørelse",
+      metadata: { avgjørelse: avgjørelseMatch[1] },
     };
   }
 
