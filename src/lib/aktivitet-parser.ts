@@ -115,8 +115,7 @@ export function parseAktivitet(aktivitet: Aktivitet): ParsetAktivitet {
     (k) => k.kontekstType === "Fase",
   );
   const fase = faseKontekst?.kontekstMap["fase"] as
-    | AktivitetKategori
-    | undefined;
+    AktivitetKategori | undefined;
 
   // Tilstandsendring
   const tilstandMatch = melding.match(TILSTANDSENDRING_REGEX);
