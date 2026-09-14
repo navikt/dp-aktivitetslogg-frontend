@@ -334,3 +334,9 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,intellij,node,nextjs,git
 .idea
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
