@@ -20,7 +20,7 @@
     "@navikt/ds-react": "^8.16.1",
     "@navikt/oasis": "^4.1.4",
     "@types/node": "26.5.0",
-    "@types/react": "19.2.17",
+    "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
     "eslint": "9.39.5",
     "eslint-config-next": "16.2.12",
@@ -50,7 +50,7 @@
     ]
   },
   "overrides": {
-    "@types/react": "19.2.14",
+    "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7"
   }
 }
