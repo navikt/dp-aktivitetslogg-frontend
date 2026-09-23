@@ -71,7 +71,7 @@ importers:
         version: 10.1.8(eslint@9.39.5)
       eslint-plugin-prettier:
         specifier: ^5.5.6
-        version: 5.5.6(eslint-config-prettier@10.1.8(eslint@9.39.5))(eslint@9.39.5)(prettier@3.9.6)
+        version: 5.5.6(eslint-config-prettier@10.1.8(eslint@9.39.5))(eslint@9.39.5)(prettier@3.9.7)
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -80,7 +80,7 @@ importers:
         version: 17.5.1
       prettier:
         specifier: ^3.9.6
-        version: 3.9.6
+        version: 3.9.7
       vitest:
         specifier: ^5.0.0
         version: 5.0.1(@opentelemetry/api@1.9.1)(@types/node@26.6.1)(vite@8.3.0(@types/node@26.6.1)(yaml@2.9.1))
@@ -2698,8 +2698,8 @@ packages:
     resolution: {integrity: sha512-SxToR7P8Y2lWmv/kTzVLC1t/GDI2WGjMwNhLLE9qtH8Q13C+aEmuRlzDst4Up4s0Wc8sF2M+J57iB3cMLqftfg==}
     engines: {node: '>=6.0.0'}
 
-  prettier@3.9.6:
-    resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
+  prettier@3.9.7:
+    resolution: {integrity: sha512-T3mF5P7HFzZVLDQuCUNtJj6WK1pcpLMweMNUVwGb01bLNkH9AkKxtZvmInw8K6bnn2O3d6/5RHl6zSHiBAD0Og==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -4923,7 +4923,7 @@ snapshots:
       eslint: 9.39.5
       eslint-import-resolver-node: 0.3.10
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.58.1(eslint@9.39.5)(typescript@6.0.3))(eslint@9.39.5))(eslint@9.39.5)
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.58.1(eslint@9.39.5)(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.58.1(eslint@9.39.5)(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.58.1(eslint@9.39.5)(typescript@6.0.3))(eslint@9.39.5))(eslint@9.39.5))(eslint@9.39.5)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.5)
       eslint-plugin-react: 7.37.5(eslint@9.39.5)
       eslint-plugin-react-hooks: 7.0.1(eslint@9.39.5)
@@ -4960,7 +4960,7 @@ snapshots:
       tinyglobby: 0.2.17
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.58.1(eslint@9.39.5)(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.58.1(eslint@9.39.5)(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.58.1(eslint@9.39.5)(typescript@6.0.3))(eslint@9.39.5))(eslint@9.39.5))(eslint@9.39.5)
     transitivePeerDependencies:
       - supports-color
 
@@ -4975,7 +4975,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.58.1(eslint@9.39.5)(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.58.1(eslint@9.39.5)(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.58.1(eslint@9.39.5)(typescript@6.0.3))(eslint@9.39.5))(eslint@9.39.5))(eslint@9.39.5):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -5023,10 +5023,10 @@ snapshots:
       safe-regex-test: 1.1.0
       string.prototype.includes: 2.0.1
 
-  eslint-plugin-prettier@5.5.6(eslint-config-prettier@10.1.8(eslint@9.39.5))(eslint@9.39.5)(prettier@3.9.6):
+  eslint-plugin-prettier@5.5.6(eslint-config-prettier@10.1.8(eslint@9.39.5))(eslint@9.39.5)(prettier@3.9.7):
     dependencies:
       eslint: 9.39.5
-      prettier: 3.9.6
+      prettier: 3.9.7
       prettier-linter-helpers: 1.0.1
       synckit: 0.11.13
     optionalDependencies:
@@ -6102,7 +6102,7 @@ snapshots:
     dependencies:
       fast-diff: 1.3.0
 
-  prettier@3.9.6: {}
+  prettier@3.9.7: {}
 
   pretty-ms@9.3.1:
     dependencies:
