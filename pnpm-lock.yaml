@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@navikt/ds-css':
         specifier: ^8.16.1
-        version: 8.16.2
+        version: 8.17.2
       '@navikt/ds-react':
         specifier: ^8.16.1
         version: 8.16.2(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -580,8 +580,8 @@ packages:
     engines: {node: '>=22.0.0'}
     hasBin: true
 
-  '@navikt/ds-css@8.16.2':
-    resolution: {integrity: sha512-RMKKQ1OTXGPwSGPsWEvOXpRTxA+QhnHc4oGG0ePg7AeeGQvYE/VjtySL2ddOYwAR8BygyvuB/sDrjm5AkQQ0cw==, tarball: https://npm.pkg.github.com/download/@navikt/ds-css/8.16.2/a132ee47c528af289b89dd5d806ac1abfc937e44}
+  '@navikt/ds-css@8.17.2':
+    resolution: {integrity: sha512-k+xkEVF5ZBSM5UoLjqDsRAn/mBrlLXL3S8JLQj3syW1i4HIu6N6FaIGMveZeobZef5rIBWwhLGsIJ8doWtgyOQ==, tarball: https://npm.pkg.github.com/download/@navikt/ds-css/8.17.2/b0294b41e7004be0e010c409ae4d42c6167c8538}
 
   '@navikt/ds-react@8.16.2':
     resolution: {integrity: sha512-pJGVltBJT5hNwo+fZee5qaM+Kc+hZZgPU7WoXbUbZxUtTbhHM+5uFo4J5ceMU2KBUhamtqtRGso2dXdztyEiHQ==, tarball: https://npm.pkg.github.com/download/@navikt/ds-react/8.16.2/212af8009cab85a672faa15f0a039eaabec9cbc7}
@@ -3938,7 +3938,7 @@ snapshots:
       - '@babel/preset-env'
       - supports-color
 
-  '@navikt/ds-css@8.16.2': {}
+  '@navikt/ds-css@8.17.2': {}
 
   '@navikt/ds-react@8.16.2(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
