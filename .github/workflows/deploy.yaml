@@ -41,7 +41,7 @@ jobs:
       - run: pnpm dlx @cyclonedx/cdxgen -t js -o sbom.json
 
       - name: docker-build-push
-        uses: nais/docker-build-push@v0
+        uses: nais/docker-build-push@v1
         id: docker-build-push
         with:
           team: teamdagpenger
